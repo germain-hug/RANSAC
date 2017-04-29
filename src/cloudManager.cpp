@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-// test : je rajoute un bail t'as vu  //test2 prout
+// test : je rajoute un bail t'as vu  //test2 prout 2
 
 
 namespace acq {
