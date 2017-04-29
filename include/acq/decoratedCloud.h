@@ -50,6 +50,8 @@ public:
     /** \brief Check, if any normals stored. */
     bool hasNormals() const { return static_cast<bool>(_normals.size()); }
 
+
+
 protected:
     CloudT   _vertices; //!< Point cloud, N x 3 matrix where N is the number of points.
     FacesT   _faces;    //!< Faces stored as rows of vertex indices (referring to \ref _vertices).
