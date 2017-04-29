@@ -4,7 +4,11 @@
 
 #include "acq/impl/cloudManager.hpp"
 #include <iostream>
-// test 
+
+
+// test : je rajoute un bail t'as vu
+
+
 namespace acq {
 
 void CloudManager::addCloud(DecoratedCloud const& cloud) {
