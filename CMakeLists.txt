@@ -115,12 +115,21 @@ set(SOURCE_FILES
     include/acq/typedefs.h
     include/acq/normalEstimation.h
     include/acq/impl/normalEstimation.hpp
-    include/acq/decoratedCloud.h 
-    include/acq/impl/decoratedCloud.hpp 
-    include/acq/cloudManager.h 
-    include/acq/impl/cloudManager.hpp 
-    src/normalEstimation.cpp 
-    src/decoratedCloud.cpp 
+    include/acq/decoratedCloud.h
+    include/acq/impl/decoratedCloud.hpp
+    include/acq/cloudManager.h
+    include/acq/impl/cloudManager.hpp
+		include/acq/gestion.h
+		include/acq/impl/gestion.hpp
+		include/acq/cloudPrimitive.h
+		include/acq/impl/cloudPrimitive.hpp
+		include/acq/primitive.h
+		include/acq/impl/primitive.hpp
+		src/cloudPrimitive.cpp
+		src/plane.cpp
+		src/sphere.cpp
+    src/normalEstimation.cpp
+    src/decoratedCloud.cpp
     src/cloudManager.cpp
     src/main.cpp
 )
@@ -139,9 +148,9 @@ if (NOT WIN32)
 endif()
 
 # Link dependency libraries
-target_link_libraries(iglFramework 
-	nanogui 
-	${NANOGUI_EXTRA_LIBS} 
+target_link_libraries(iglFramework
+	nanogui
+	${NANOGUI_EXTRA_LIBS}
 	${GLEW_LIBRARIES}
 )
 
@@ -158,4 +167,3 @@ endif()
 # mkdir lib
 # cd lib
 # cmake -DCMAKE_BUILD_TYPE=Release -DLIBIGL_WITH_NANOGUI=YES -DLIBIGL_WITH_ANTTWEAKBAR=NO -DLIBIGL_WITH_CGAL=NO ../optional
-
