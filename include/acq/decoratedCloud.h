@@ -42,7 +42,7 @@ public:
     bool hasFaces() const { return static_cast<bool>(_faces.size()); }
 
     /** \brief Getter for normals. */
-    NormalsT      & getNormals() { return _normals; }
+    NormalsT & getNormals() { return _normals; }
     /** \brief Getter for normals (const version). */
     NormalsT const& getNormals() const { return _normals; }
     /** \brief Setter for normals. */

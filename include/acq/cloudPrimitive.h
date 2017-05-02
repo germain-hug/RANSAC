@@ -6,20 +6,17 @@
 
 namespace acq {
 
-/** \brief Small class to keep track of multiple point clouds. */
+/** Small class to keep track of multiple primitives */
     class CloudPrimitive {
     public:
-        /** \brief Append a cloud to the list of clouds. */
+        /** add a primitive to the vector */
         void addPrimitive(Primitive const& primitive);
 
-        /** \brief Overwrite a cloud at a specific index. */
+        /** set the primitive to a fixed place */
         void setPrimitive(Primitive const& primitive, int index);
 
-        /** \brief Get cloud with specific index. */
+        /** get back the primitive from a vector  */
         Primitive& getPrimitive(int index);
-
-        /** \brief Get cloud with specific index (const version). */
-        Primitive const& getPrimitive(int index) const;
 
         // find the primitive with the best score : return the index
         int findBestScore() ;
@@ -28,13 +25,13 @@ namespace acq {
         void deletePrimitive(int index) ;
 
     protected:
-        std::vector<Primitive> _primitives ; //!< List of clouds possibly with normals and faces.
+        std::vector<Primitive> _primitives ; 
 
     public:
         // See https://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    }; //...class CloudManager
+    }; 
 
-} //...ns acq
+} 
 
-#endif // ACQ_CLOUDMANAGER_H
+#endif 

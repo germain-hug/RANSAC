@@ -6,7 +6,6 @@
 #include <iostream>
 
 namespace acq {
-
     
 void CloudManager::addCloud(DecoratedCloud const& cloud) {
     _clouds.push_back(cloud);
