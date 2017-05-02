@@ -10,7 +10,6 @@ namespace acq {
     void computeSphere(Eigen::Matrix3i sample_idx, DecoratedCloud cloud); // test if sphere -> create sphere primitive
     void computePlane(Eigen::Matrix3i sample_idx, DecoratedCloud cloud);
 
-
 // pour la matrix de color a la fin :
 
    // DecoratedCloud removeCloud(DecoratedCloud cloud, )

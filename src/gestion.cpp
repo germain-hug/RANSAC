@@ -1,5 +1,7 @@
 #include "gestion.h"
 
+namespace acq {
+
 // Renvoie matrice d'index de vertices
 Eigen::MatrixXi sample(int cloudSize, int N) {
     Eigen::MatrixXi sampleInd(numberPoint,1) ;
@@ -11,4 +13,10 @@ Eigen::MatrixXi sample(int cloudSize, int N) {
     return sampleInd ;
 }
 
+// Renvoie la variance 
+double computeVariance(Eigen::MatrixXd V) {
+
+}
+
+}
 

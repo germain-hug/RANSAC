@@ -28,18 +28,21 @@ namespace acq {
     class Sphere : public Primitive {
 
     public:
+        // constructor and destructor 
         Sphere(double radius, Eigen::Matrix3d center) : _radius(radius), _center(center) {} ;
         ~Sphere(){};
 
+        // getters/setters 
         double getRadius()const{return _radius;}
         Eigen::Matrix3d getCenter()const{return _center;}
         void setRadius(double radius){_radius = radius;}
         void setCenter(Eigen::Matrix3d center){_center = center;}
 
-        void computeScore(double variance, Eigen::MatrixXd pointCloud);
-        Eigen::MatrixXi computeInliers(Eigen::MatrixXd pointCloud);
+        void computeScore(double variance, DecoratedCloud& cloud);
+        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud);
 
     private:
+        // radius and center of the sphere 
         double _radius;
         Eigen::Matrix3d _center;
     };
@@ -56,8 +59,8 @@ namespace acq {
         void setNormal(Eigen::Matrix3d normal){_normal = normal;}
         void setRefPoint(Eigen::Matrix3d refPoint){_refPoint = refPoint;}
 
-        void computeScore(double variance, Eigen::MatrixXd pointCloud);
-        Eigen::MatrixXi computeInliers(Eigen::MatrixXd pointCloud);
+        void computeScore(double variance, DecoratedCloud& cloud);
+        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud);
 
     private:
         Eigen::Matrix3d _refPoint;
