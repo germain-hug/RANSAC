@@ -1,7 +1,6 @@
 #include "acq/normalEstimation.h"
 #include "acq/decoratedCloud.h"
 #include "acq/cloudManager.h"
-#include "acq/cloudPrimitive.h"
 #include "acq/gestion.h"
 
 #include "nanogui/formhelper.h"

@@ -1,15 +1,15 @@
 #ifndef ACQ_GESTION_H
 #define ACQ_GESTION_H
 
+#include "acq/cloudPrimitive.h"
+
 #include "acq/typedefs.h"
-#include "acq/impl/decoratedCloud.hpp"
-#include "acq/impl/cloudPrimitive.hpp"
 
 #include <Eigen/Dense>
 
 namespace acq {
 
-    Eigen::MatrixXi sample(int cloudSize, int numberPoint); // Renvoie matrice d'index de vertices
+    Eigen::MatrixXi sample(int cloudSize) ; // Renvoie matrice d'index de vertices
     double computeVariance(Eigen::MatrixXd V);
 
     // try to compute a sphere with this sample points 

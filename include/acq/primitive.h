@@ -2,8 +2,7 @@
 #define ACQ_PRIMITIVE_H
 
 #include "acq/typedefs.h"
-#include "acq/cloudPrimitive.h"
-#include "acq/gestion.h"
+#include "acq/decoratedCloud.h"
 
 #include <math.h>
 
