@@ -5,7 +5,7 @@
 #include "nanogui/formhelper.h"
 #include "nanogui/screen.h"
 
-#include "igl/readOFF.h"
+#include "igl/readOBJ.h"
 #include "igl/viewer/Viewer.h"
 
 #include <iostream>
@@ -84,43 +84,40 @@ int main(int argc, char *argv[]) {
 
 
     // Load a mesh in OFF format
-    std::string meshPath = "../3rdparty/libigl/tutorial/shared/bunny.off";
+    std::string meshPath = "../models/sphere_cube.obj";
     if (argc > 1) {
         meshPath = std::string(argv[1]);
-        if (meshPath.find(".off") == std::string::npos) {
-            std::cerr << "Only ready for  OFF files for now...\n";
+        if (meshPath.find(".obj") == std::string::npos) {
+            std::cerr << "Only ready for  OBJ files for now...\n";
             return EXIT_FAILURE;
         }
     } else {
-        std::cout << "Usage: iglFrameWork <path-to-off-mesh.off>." << "\n";
+        std::cout << "Usage: iglFrameWork <path-to-off-mesh.obj>." << "\n";
     }
 
     // Visualize the mesh in a viewer
     igl::viewer::Viewer viewer;
-    {
-        // Don't show face edges
-        viewer.core.show_lines = false;
-    }
+    viewer.core.show_lines = false;
+    viewer.core.show_overlay = false;
 
     // Store cloud so we can store normals later
     acq::CloudManager cloudManager;
     // Read mesh from meshPath
     {
-        // Pointcloud vertices, N rows x 3 columns.
-        Eigen::MatrixXd V;
-        // Face indices, M x 3 integers referring to V.
-        Eigen::MatrixXi F;
-        // Read mesh
-        igl::readOFF(meshPath, V, F);
-        // Check, if any vertices read
+        Eigen::MatrixXd V, TC, N;
+        Eigen::MatrixXi F, FTC, FN;
+        igl::readOBJ(meshPath, V, TC, N, F, FTC, FN);
+
+        if(FTC.size() == 0) FTC = F;
+
         if (V.rows() <= 0) {
             std::cerr << "Could not read mesh at " << meshPath
                       << "...exiting...\n";
             return EXIT_FAILURE;
-        } //...if vertices read
+        }
 
         // Store read vertices and faces
-        cloudManager.addCloud(acq::DecoratedCloud(V, F));
+        cloudManager.addCloud(acq::DecoratedCloud(V, F, N));
 
         // Show mesh
         viewer.data.set_mesh(
@@ -128,22 +125,13 @@ int main(int argc, char *argv[]) {
             cloudManager.getCloud(0).getFaces()
         );
 
-        // Calculate normals on launch
-        cloudManager.getCloud(0).setNormals(
-            acq::recalcNormals(
-                /* [in]      K-neighbours for FLANN: */ kNeighbours,
-                /* [in]             Vertices matrix: */ cloudManager.getCloud(0).getVertices(),
-                /* [in]      max neighbour distance: */ maxNeighbourDist
-            )
-        );
+        // Set Normals from OBJ file
+        cloudManager.getCloud(0).setNormals(N);
+        std::cout << N.size() << std::endl;
 
         // Update viewer
-        acq::setViewerNormals(
-            viewer,
-            cloudManager.getCloud(0).getVertices(),
-            cloudManager.getCloud(0).getNormals()
-        );
-    } //...read mesh
+        acq::setViewerNormals(viewer, cloudManager.getCloud(0).getVertices(), N);
+    }
 
     // Extend viewer menu using a lambda function
     viewer.callback_init =
@@ -155,7 +143,7 @@ int main(int argc, char *argv[]) {
         // Add an additional menu window
         viewer.ngui->addWindow(Eigen::Vector2i(900,10), "Acquisition3D");
 
-        
+
 
         // Generate menu
         viewer.screen->performLayout();
