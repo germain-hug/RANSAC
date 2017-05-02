@@ -15,8 +15,8 @@ namespace acq {
         void setScore(double score){_score = score;}
         void setInliers_idx(Eigen::MatrixXi inliers_idx){_inliers_idx = inliers_idx;}
 
-        void computeScore(double variance, Eigen::MatrixXd pointCloud); // Appelle computeInliers
-        Eigen::MatrixXi computeInliers(Eigen::MatrixXd pointCloud);
+        void computeScore(Eigen::Matrix3d variance, Eigen::MatrixXd pointCloud); // Appelle computeInliers
+        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
 
 
     protected:
@@ -38,8 +38,8 @@ namespace acq {
         void setRadius(double radius){_radius = radius;}
         void setCenter(Eigen::Matrix3d center){_center = center;}
 
-        void computeScore(double variance, DecoratedCloud& cloud);
-        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud);
+        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud);
+        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
 
     private:
         // radius and center of the sphere 
@@ -59,8 +59,8 @@ namespace acq {
         void setNormal(Eigen::Matrix3d normal){_normal = normal;}
         void setRefPoint(Eigen::Matrix3d refPoint){_refPoint = refPoint;}
 
-        void computeScore(double variance, DecoratedCloud& cloud);
-        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud);
+        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud);
+        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
 
     private:
         Eigen::Matrix3d _refPoint;
