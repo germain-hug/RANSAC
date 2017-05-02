@@ -3,10 +3,10 @@
 namespace acq {
 
 // Renvoie matrice d'index de vertices
-Eigen::MatrixXi sample(int cloudSize, int numberPoint) {
-    Eigen::MatrixXi sampleInd(numberPoint,1) ;
+Eigen::MatrixXi sample(int cloudSize) {
+    Eigen::Matrix<int, 3,1> sampleInd(numberPoint,1) ;
     // add a random indices between 0 and sizeMatrix in a numberPoint sized vector 
-    for (int i=0; i<numberPoint; i++) {
+    for (int i=0; i<3; i++) {
         int newIndex = rand() % (cloudSize + 1) ;
         sampleInd(i) = newIndex ;
     }
@@ -24,7 +24,7 @@ Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
 }
 
 // if the 3 points create a sphere, we add it to the primitives 
-bool computeSphere(Eigen::Matrix3i sample_idx,Eigen::Matrix3d variance, DecoratedCloud& cloud, cloudPrimitive primitives, double threshold, double alpha) {
+bool computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, cloudPrimitive primitives, double threshold, double alpha) {
     Eigen::MatrixXd vertices = cloud.getVertices() ;
     Eigen::MatrixXd normals = cloud.getNormals() ;
     int cloudSize = vertices.rows() ;
@@ -88,7 +88,7 @@ bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshol
 }
 
 // compute the center of a shpere by finding the better intersection possible using least square computation
-Eigen::Matrix<double, 1,3> computerCenter(Eigen::Matrix3d vertices, Eigen::Matrix3d normals) {
+Eigen::Matrix<double, 1,3> computerCenter(Eigen::MatrixXd vertices, Eigen::MatrixXd normals) {
     Eigen::MatrixXd::Zero(3,3) R ;
     Eigen::Matrix<double, 3,1> q ;
     q = setZero(3,1) ;

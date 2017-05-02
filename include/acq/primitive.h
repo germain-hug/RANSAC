@@ -2,7 +2,9 @@
 #define ACQ_PRIMITIVE_H
 
 #include "acq/typedefs.h"
+#include "acq/cloudPrimitive.h"
 #include "acq/gestion.h"
+
 #include <math.h>
 
 namespace acq {
@@ -17,7 +19,7 @@ namespace acq {
         void setScore(double score){_score = score;}
         void setInliers_idx(Eigen::MatrixXi inliers_idx){_inliers_idx = inliers_idx;}
 
-        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& pointCloud, double threshold, double alpha); // Appelle computeInliers
+        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& pointCloud, double threshold, double alpha); 
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
         int findBestNumberPoints(Eigen::Matrix3d variance) ;
     
