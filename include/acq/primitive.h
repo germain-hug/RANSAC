@@ -2,6 +2,8 @@
 #define ACQ_PRIMITIVE_H
 
 #include "acq/typedefs.h"
+#include "acq/gestion.h"
+#include <math.h>
 
 namespace acq {
 
@@ -15,10 +17,10 @@ namespace acq {
         void setScore(double score){_score = score;}
         void setInliers_idx(Eigen::MatrixXi inliers_idx){_inliers_idx = inliers_idx;}
 
-        void computeScore(Eigen::Matrix3d variance, Eigen::MatrixXd pointCloud); // Appelle computeInliers
+        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& pointCloud, double threshold, double alpha); // Appelle computeInliers
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
-
-
+        int findBestNumberPoints(Eigen::Matrix3d variance) ;
+    
     protected:
         double _score;
         Eigen::MatrixXi _inliers_idx;
@@ -38,8 +40,9 @@ namespace acq {
         void setRadius(double radius){_radius = radius;}
         void setCenter(Eigen::Matrix3d center){_center = center;}
 
-        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud);
+        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double threshold, double alpha);
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
+        int findBestNumberPoints(Eigen::Matrix3d variance) ;
 
     private:
         // radius and center of the sphere 
@@ -59,8 +62,9 @@ namespace acq {
         void setNormal(Eigen::Matrix3d normal){_normal = normal;}
         void setRefPoint(Eigen::Matrix3d refPoint){_refPoint = refPoint;}
 
-        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud);
+        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double threshold, double alpha);
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
+        int findBestNumberPoints(Eigen::Matrix3d variance) ;
 
     private:
         Eigen::Matrix3d _refPoint;

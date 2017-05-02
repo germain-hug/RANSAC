@@ -13,7 +13,7 @@ Eigen::MatrixXi sample(int cloudSize, int numberPoint) {
     return sampleInd ;
 }
 
-// Renvoie la variance 
+// Return the variance of the point cloud ()
 Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
     // compute the matrix minus the min of each coordinate
     Eigen::MatrixXd centered = V.rowwise() - V.colwise().mean();
@@ -24,7 +24,7 @@ Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
 }
 
 // if the 3 points create a sphere, we add it to the primitives 
-bool computeSphere(Eigen::Matrix3i sample_idx, DecoratedCloud& cloud, cloudPrimitive primitives, double threshold, double alpha) {
+bool computeSphere(Eigen::Matrix3i sample_idx,Eigen::Matrix3d variance, DecoratedCloud& cloud, cloudPrimitive primitives, double threshold, double alpha) {
     Eigen::MatrixXd vertices = cloud.getVertices() ;
     Eigen::MatrixXd normals = cloud.getNormals() ;
     int cloudSize = vertices.rows() ;
@@ -42,7 +42,19 @@ bool computeSphere(Eigen::Matrix3i sample_idx, DecoratedCloud& cloud, cloudPrimi
     bool isSphere = isSphere(thisVertices, thisNormals, threshold, alpha) ;
 
     if (isSphere) {
-        
+        // compute the attribut for the object 
+        Eigen::Matrix<double, 1,3> thisCenter = computerCenter(thisVertices, thisNormals) ;
+        double thisRadius = computerRadius(thisVertices, thisCenter) ;
+
+        // create the object and compute its score 
+        Sphere thisSphere = Sphere(thisRadius, thisCenter) ;
+        thisSphere.computeScore(variance, cloud, threshold, alpha) ;
+
+        // store it in the cloud primitive 
+        primitives.addPrimitive(thisSphere) ;
+
+        // the sphere has been accepted : we return true 
+        return true ;
     }
 
     else {
@@ -52,21 +64,23 @@ bool computeSphere(Eigen::Matrix3i sample_idx, DecoratedCloud& cloud, cloudPrimi
 
 // return true if the 3 points create a valid sphere 
 bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold, double alpha) {
-    // compute the center using 2 points 
+    // estimate the center and the radius using 2 points 
     Eigen::Matrix<double, 1,3> thisCenter = computerCenter(vertices.topRows(2), normals.topRows(2)) ;
+    double estimatedRadius = computerRadius(vertices.topRows(2), thisCenter) ;
 
-    // compute the radius of the estimated sphere 
-    double estimatedRadius ((vertices.row(0)-thisCenter).norm() +(vertices.row(1)-thisCenter).norm())/2.0 ;
-    Eigen::Matrix<double, 1,3> estimatedNormal = vertices.row(2)- thisCenter ;
+    // compute the estimated normal for the least point  
+    Eigen::Matrix<double, 1,3> estimatedNormal = vertices.row(2) - thisCenter ;
     estimatedNormal = estimatedNormal.normalized() ;
 
     // test for the radius 
-    double test1 = (vertices.row(2)-thisCenter).norm() -estimatedRadius ;
+    double test1 = computerRadius(vertices.row(2), thisCenter) - estimatedRadius ;
     double test2 = estimatedNormal.dot(normals.row(2)) ;
 
     if (test1.abs() < threshold )
-        if ( test2 < alpha )
+        if ( test2 < alpha ) {
+            // if the 2 test are true, the 3 points form a sphere  
             return true ; 
+        }
         else 
             return false ; 
     else 
@@ -99,6 +113,17 @@ Eigen::Matrix<double, 1,3> computerCenter(Eigen::Matrix3d vertices, Eigen::Matri
     thisCenter = R.jacobiSvd(ComputeThinU | ComputeThinV).solve(q) ;
 
     return thisCenter.transpose() ;
+}
+
+double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> thisCenter) {
+    // compute the distance between each point and the center
+    int numberPoint = thisVertices.rows() ;
+    Eigen::Matrix3d centerArray = thisCenter.replicate(numberPoint,1) ;
+    Eigen::Matrix<double, numberPoint,1> distances = (thisVertices-centerArray).rowwise().norm() ;
+
+    // compute the mean and return it 
+    double meanRadius = distances.colwise().mean() ;
+    return meanRadius ;
 }
 
 }
