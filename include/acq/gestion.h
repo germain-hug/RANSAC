@@ -8,11 +8,11 @@
 
 namespace acq {
 
-    // ****** Sample the point cloud and compute its variance *******
-    Eigen::MatrixXi sample(int cloudSize) ; // Renvoie matrice d'index de vertices
-    double computeVariance(Eigen::MatrixXd V);
+    //  ****** ============ Helper Functions  =============== ******* 
+    Eigen::MatrixXi sample(int cloudSize) ; // sample the point cloud
+    double computeVariance(Eigen::MatrixXd V); // compute the variance 
 
-    //  ****** Functions to handle a sphere ******* 
+    //  ****** ============ Functions to handle a sphere =============== ******* 
     // determine if the 3 points gives a sphere or no 
     bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold, double alpha) ;
     
@@ -23,7 +23,7 @@ namespace acq {
     Eigen::Matrix<double, 1,3> computerCenter(Eigen::MatrixXd vertices, Eigen::MatrixXd normals) ;
     double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> thisCenter) ;
 
-    //  ****** Functiosn to handle a plane ******* 
+    /********* ============= Functions to handle PLANE =============== *********/
     bool computePlane(Eigen::Matrix3i sample_idx, Eigen::Matrix3d variance, DecoratedCloud &cloud, CloudPrimitive& primitives, double T);
     bool isPlane(Eigen::MatrixXd V, Eigen::MatrixXd N, double T, double alpha);
     Eigen::RowVector3d computeNormal(Eigen::MatrixXd V, Eigen::MatrixXd _N);
