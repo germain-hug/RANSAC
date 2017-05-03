@@ -11,7 +11,7 @@ namespace acq {
 
     //  ****** ============ Helper Functions  =============== ******* 
     Eigen::MatrixXi sample(int cloudSize) ; // sample the point cloud
-    double computeVariance(Eigen::MatrixXd V); // compute the variance 
+    Eigen::Matrix3d computeVariance(Eigen::MatrixXd V); // compute the variance 
 
     //  ****** ============ Functions to handle a sphere =============== ******* 
     // determine if the 3 points gives a sphere or no 
@@ -29,8 +29,7 @@ namespace acq {
     bool isPlane(Eigen::MatrixXd V, Eigen::MatrixXd N, double T, double alpha);
     Eigen::RowVector3d computeNormal(Eigen::MatrixXd V, Eigen::MatrixXd _N);
 
-    /********* ============= Functions to handle the final cloud =============== *********/
-     
+    /********* ============= Functions to handle the final cloud =============== *********/ 
     DecoratedCloud fuse(CloudPrimitive& best_primitives, CloudManager& clouds) ;
     bool cleanCloud(DecoratedCloud& oldCloud, DecoratedCloud& newCloud, Eigen::Matrix3i inliers_idx) ;
 }
