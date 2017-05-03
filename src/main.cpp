@@ -1,7 +1,5 @@
 #include "acq/normalEstimation.h"
-#include "acq/decoratedCloud.h"
-#include "acq/cloudManager.h"
-#include "acq/gestion.h"
+#include "acq/ransac.h"
 
 #include "nanogui/formhelper.h"
 #include "nanogui/screen.h"
@@ -78,11 +76,6 @@ int main(int argc, char *argv[]) {
     bool boolVariable = true;
     // Dummy variable to demo GUI
     float floatVariable = 0.1f;
-
-    /* ====================================== */
-    /* ===== TODO 1) : LIRE FICHIER OBJ ===== */
-    /* ====================================== */
-
 
     // Load a mesh in OFF format
     std::string meshPath = "../models/sphere_cube.obj";
