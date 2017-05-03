@@ -2,6 +2,8 @@
 
 namespace acq {
 
+// ****** Sample the point cloud and compute its variance *******
+
 // Renvoie matrice d'index de vertices
 Eigen::MatrixXi sample(int cloudSize) {
     Eigen::Matrix<int, 3,1> sampleInd(numberPoint,1) ;
@@ -23,45 +25,7 @@ Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
     return cov ;
 }
 
-// if the 3 points create a sphere, we add it to the primitives 
-bool computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, cloudPrimitive primitives, double threshold, double alpha) {
-    Eigen::MatrixXd vertices = cloud.getVertices() ;
-    Eigen::MatrixXd normals = cloud.getNormals() ;
-    int cloudSize = vertices.rows() ;
-
-    Eigen::Matrix3d thisVertices ;
-    Eigen::Matrix3d thisNormals ;
-
-    // extract the 3 points sampled by the indices
-    for(int i =0 ; i< 3; i++) {
-        thisVertices.row(i) = vertices.row(sample_idx(i,1)) ;
-        thisNormals.row(i) = normals.row(sample_idx(i,1)) ;
-    }
-
-    // test if it's a sphere
-    bool isSphere = isSphere(thisVertices, thisNormals, threshold, alpha) ;
-
-    if (isSphere) {
-        // compute the attribut for the object 
-        Eigen::Matrix<double, 1,3> thisCenter = computerCenter(thisVertices, thisNormals) ;
-        double thisRadius = computerRadius(thisVertices, thisCenter) ;
-
-        // create the object and compute its score 
-        Sphere thisSphere = Sphere(thisRadius, thisCenter) ;
-        thisSphere.computeScore(variance, cloud, threshold, alpha) ;
-
-        // store it in the cloud primitive 
-        primitives.addPrimitive(thisSphere) ;
-
-        // the sphere has been accepted : we return true 
-        return true ;
-    }
-
-    else {
-        return false ; 
-    }
-}
-
+//  ****** Function to handle a sphere ******* 
 // return true if the 3 points create a valid sphere 
 bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold, double alpha) {
     // estimate the center and the radius using 2 points 
@@ -85,6 +49,45 @@ bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshol
             return false ; 
     else 
         return false ; 
+}
+
+// if the 3 points create a sphere, we add it to the primitives 
+bool computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, cloudPrimitive primitives, double threshold, double alpha) {
+    Eigen::MatrixXd vertices = cloud.getVertices() ;
+    Eigen::MatrixXd normals = cloud.getNormals() ;
+    int cloudSize = vertices.rows() ;
+
+    Eigen::Matrix3d thisSampledVertices ;
+    Eigen::Matrix3d thisSampledNormals ;
+
+    // extract the 3 points sampled by the indices
+    for(int i =0 ; i< 3; i++) {
+        thisSampledVertices.row(i) = vertices.row(sample_idx(i,1)) ;
+        thisSampledNormals.row(i) = normals.row(sample_idx(i,1)) ;
+    }
+
+    // test if it's a sphere
+    bool isSphere = isSphere(thisSampledVertices, thisSampledNormals, threshold, alpha) ;
+
+    if (isSphere) {
+        // compute the attribut for the object 
+        Eigen::Matrix<double, 1,3> thisCenter = computerCenter(thisSampledVertices, thisSampledNormals) ;
+        double thisRadius = computerRadius(thisSampledVertices, thisCenter) ;
+
+        // create the object and compute its score 
+        Sphere thisSphere = Sphere(thisRadius, thisCenter) ;
+        thisSphere.computeScore(variance, cloud, threshold, alpha) ;
+
+        // store it in the cloud primitive 
+        primitives.addPrimitive(thisSphere) ;
+
+        // the sphere has been accepted : we return true 
+        return true ;
+    }
+
+    else {
+        return false ; 
+    }
 }
 
 // compute the center of a shpere by finding the better intersection possible using least square computation
