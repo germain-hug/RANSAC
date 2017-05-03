@@ -2,7 +2,6 @@
 #define ACQ_GESTION_H
 
 #include "acq/cloudPrimitive.h"
-
 #include "acq/typedefs.h"
 
 #include <Eigen/Dense>

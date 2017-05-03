@@ -2,14 +2,14 @@
 
 namespace acq {
     void Sphere::computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double threshold, double alpha) {
-        // Look how many point are supposed to be there  
-        int bestNumber = this->findBestNumberPoints(variance) ;
-
         // compute the inliers 
         Eigen::MatrixXi inliers_idx =  this->computeInliers(cloud,threshold, alpha) ;
 
         // set the inliers for this primitive 
         this->setInliers_idx(inliers_idx) ;
+
+        // Look how many point are supposed to be there  
+        int bestNumber = this->findBestNumberPoints(variance) ;
 
         // compute the score 
         int numberInliers = inliers_idx.rows() ;
@@ -33,11 +33,10 @@ namespace acq {
     Eigen::MatrixXi Sphere::computeInliers(DecoratedCloud& cloud, double threshold, double alpha) {
         int numberPoint = cloud.getVertices().rows() ;
         Eigen::Matrix<double, 1,3> thisVertice, thisNormal, estimatedNormal ;
-        Eigen::Matrix<double, 1,3> thisNormal ;
         int index_inliers = 0 ;
         double thisRadius, test1, test2 ;
 
-        Eigen::Matrix<int,numberPoint, 1> inliers ;
+        Eigen::MatrixXi inliers_idx(numberPoint, 1) ;
 
         // test for each point if it is in the sphere or not 
         for (int i=0; i < numberPoint; i++) {
@@ -45,7 +44,7 @@ namespace acq {
             thisNormal = cloud.getNormals().row(i) ;
 
             // compute the estimated normal and radius for this point  
-            thisRadius = computerRadius(thisVertice, _center) ;
+            thisRadius = (thisVertice - _center).norm() ;
             estimatedNormal = thisVertice - _center ;
             estimatedNormal = estimatedNormal.normalized() ;
 
@@ -53,17 +52,17 @@ namespace acq {
             test1 = thisRadius - _radius ;
             test2 = estimatedNormal.dot(thisNormal) ;
 
-            if (test1.abs() < threshold ) {
+            if (std::abs(test1) < threshold ) {
                 if ( test2 < alpha ) {
                     // if the 2 test are true, the point is an inlier 
-                    inliers.row(index_inliers) = i ;
+                    inliers_idx(index_inliers,1) = i ;
                     index_inliers += 1 ; 
                 }
             }   
         }
         // only get back the important part 
-        inliers = inliers.topRows(index_inliers) ;
+        inliers_idx = inliers_idx.topRows(index_inliers-1) ;
 
-        return inliers ;
+        return inliers_idx ;
     }
 }

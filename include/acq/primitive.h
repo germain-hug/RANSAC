@@ -5,6 +5,7 @@
 #include "acq/decoratedCloud.h"
 
 #include <math.h>
+#include <cmath>
 
 namespace acq {
 
@@ -32,14 +33,14 @@ namespace acq {
 
     public:
         // constructor and destructor 
-        Sphere(double radius, Eigen::Matrix3d center) : _radius(radius), _center(center) {} ;
+        Sphere(double radius, Eigen::Matrix<double, 1,3> center) : _radius(radius), _center(center) {} ;
         ~Sphere(){};
 
         // getters/setters 
         double getRadius()const{return _radius;}
-        Eigen::Matrix3d getCenter()const{return _center;}
+        Eigen::Matrix<double, 1,3> getCenter()const{return _center;}
         void setRadius(double radius){_radius = radius;}
-        void setCenter(Eigen::Matrix3d center){_center = center;}
+        void setCenter(Eigen::Matrix<double, 1,3> center){_center = center;}
 
         void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double threshold, double alpha);
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
@@ -48,7 +49,7 @@ namespace acq {
     private:
         // radius and center of the sphere 
         double _radius;
-        Eigen::Matrix3d _center;
+        Eigen::Matrix<double, 1,3> _center;
     };
 
     /** ---- PLANE ---- */
