@@ -134,7 +134,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                       Eigen::Matrix3d variance,
                       DecoratedCloud &cloud,
                       CloudPrimitive &primitives,
-                      double T) {
+                      double thresh, double alpha) {
         Eigen::MatrixXd V = cloud.getVertices(), N = cloud.getNormals();
         const int cloudSize = V.rows();
         const int nSamples = sample_idx.rows();
@@ -146,13 +146,13 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             thisNormal.row(i) = N.row(sample_idx(i, 1));
         }
 
-        if (isPlane(thisVertex, thisNormal, T, alpha)) {
+        if (isPlane(thisVertex, thisNormal, thresh, alpha)) {
 
             // ---- Create a new plane and compute its score ----
             Eigen::RowVector3d planeNormal = computeNormal(thisVertex, thisNormal);
-            Eigen::RowVector3d planeRefPoint = V.colwise.mean();
+            Eigen::RowVector3d planeRefPoint = V.colwise().mean();
             Plane newPlane = Plane(planeRefPoint, planeNormal);
-            newPlane.computeScore(variance, cloud, threshold, alpha);
+            newPlane.computeScore(variance, cloud, thresh, alpha);
 
             // ---- Store it in the cloudPrimitive ----
             primitives.addPrimitive(newPlane);
@@ -164,10 +164,10 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
     /*** ----------- isPlane() ----------- ***/
     bool isPlane(Eigen::MatrixXd V, Eigen::MatrixXd N, double T, double alpha) {
-        Eigen::RowVector3d planeNormal = computeNormal(thisVertex, thisNormal);
+        Eigen::RowVector3d planeNormal = computeNormal(V, N);
         bool isPlane = true;
         for (int i = 0; i < N.rows(); i++) {
-            if (N.row(i).cross(planeNormal) < T) isPlane = false;
+            if (N.row(i).dot(planeNormal) < T) isPlane = false;
         }
         return isPlane;
     }
@@ -178,11 +178,113 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         for (int i = 0; i < V.rows() - 2; i++) {
             Eigen::RowVector3d P01 = V.row(1 + i) - V.row(i);
             Eigen::RowVector3d P02 = V.row(2 + i) - V.row(i);
-            N += P02.dot(P01) / (V.rows() - 2);
+            N += P02.cross(P01) / (V.rows() - 2);
         }
-        if (_N.row(0).cross(N) < 0) N = -N;
+        if (_N.row(0).dot(N) < 0) N = -N;
         return N;
     }
+
+
+
+    /********* ============= Functions to handle the final cloud =============== *********/
+    DecoratedCloud fuse(CloudPrimitive& best_primitives,
+                        CloudManager& clouds,
+                        double T_rad,  // Radius   Distance Threshold (Sphere)
+                        double T_cent, // Center   Distance Threshold (Sphere)
+                        double T_norm, // Normals  Distance Threshold (Plane)
+                        double T_refPt // RefPoint Distance Threshold (Plane)
+    ){
+
+        std::vector<std::pair<int,int>> fuses;
+        const int n = best_primitives.getCloudSize();
+
+        // === Consider every pair of primitive for merging ===
+        Primitive first_prim, second_prim;
+
+        for(int i=0; i<n-1; i++){ // First Primitive
+            first_prim = best_primitives.getPrimitive(i);
+            for(int j=i+1; j<n; j++){ // Second Primitive
+                second_prim = best_primitives.getPrimitive(j);
+
+                // --- Both primitives have the same type ---
+                if(first_prim.getType()==second_prim.getType()){
+
+                    // ---- They are both Spheres ---
+                    if(first_prim.getType()==1){
+                        double d1 = (first_prim.getCenter() - second_prim.getCenter()).norm();
+                        double d2 = first_prim.getRadius() - second_prim.getRadius();
+                        if(d1 < T_cent && d2 < T_rad){
+                            fuses.push_back(std::make_pair(i,j));
+                        }
+                    }// ---- They are both Planes ---
+                    else{
+                        double d1 = (first_prim.getNormal().dot(second_prim.getNormal()));
+                        double d2 = (first_prim.getRefPoint() - second_prim.getRefPoint()).dot(first_prim.getNormal());
+                        if(d1 < T_norm && d2 < T_refPt){
+                            fuses.push_back(std::make_pair(i,j));
+                        }
+                    }
+                }
+            }
+        }
+
+        // === Merge all the primitives in the cloudManager ===
+        for(int i=0; i<fuses.size(); i++){
+
+            int pr_1 = fuses.at(i).first;
+            int pr_2 = fuses.at(i).second;
+
+            // Merge both primitives
+            Eigen::MatrixXd V1 = clouds.getCloud(pr_1).getVertices();
+            Eigen::MatrixXd V2 = clouds.getCloud(pr_2).getVertices();
+            Eigen::MatrixXd N1 = clouds.getCloud(pr_1).getNormals();
+            Eigen::MatrixXd N2 = clouds.getCloud(pr_2).getNormals();
+            Eigen::MatrixXi F1 = clouds.getCloud(pr_1).getFaces();
+            Eigen::MatrixXi F2 = clouds.getCloud(pr_2).getFaces();
+            V1 << V1, V2;
+            F1 << F1, F2;
+            N1 << N1, N2;
+            // Update corresponding Meshes
+            clouds.getCloud(pr_1).setVertices(V1);
+            clouds.getCloud(pr_1).setFaces(F1);
+            clouds.getCloud(pr_1).setNormals(N1);
+        }
+        for(int i=0; i<fuses.size(); i++) { // Delete redundant clouds
+            clouds.deleteCloud(fuses.at(i).second);
+        }
+
+        // === Build new cloud with color attributes ===
+        DecoratedCloud newCloud;
+        Eigen::MatrixXd V, C, N;
+        Eigen::MatrixXi F;
+
+        for(int i=0; i< clouds.getCloudSize(); i++){
+            V << V, clouds.getCloud(i).getVertices();
+            N << N, clouds.getCloud(i).getNormals();
+            F << F, clouds.getCloud(i).getFaces();
+            C << C, Eigen::RowVector3d(std::rand()/double(RAND_MAX),
+                                       std::rand()/double(RAND_MAX),
+                                       std::rand()/double(RAND_MAX)).replicate(
+                    clouds.getCloud(i).getFaces().rows(), 1);
+        }
+
+
+        { // ---- Update Cloud ---
+            newCloud.setVertices(V);
+            newCloud.setColors(C);
+            newCloud.setFaces(F);
+            newCloud.setNormals(N);
+        }
+        return newCloud;
+
+    };
+
+
+    bool cleanCloud(DecoratedCloud& oldCloud, DecoratedCloud& newCloud, Eigen::Matrix3i inliers_idx){
+            // New Cloud = Old cloud without the detected Inliers
+
+
+    };
 
 
 }

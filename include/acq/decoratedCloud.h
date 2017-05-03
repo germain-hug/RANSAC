@@ -51,11 +51,18 @@ public:
     bool hasNormals() const { return static_cast<bool>(_normals.size()); }
 
 
+    /** \brief Getter for point cloud. */
+    CloudT const& getColors() const { return _vertices; }
+    /** \brief Setter for point cloud. */
+    void setColors(CloudT const& vertices) { _vertices = vertices; }
+
+
 
 protected:
     CloudT   _vertices; //!< Point cloud, N x 3 matrix where N is the number of points.
     FacesT   _faces;    //!< Faces stored as rows of vertex indices (referring to \ref _vertices).
     NormalsT _normals;  //!< Per-vertex normals, associated with \ref _vertices by row ID.
+    ColorT  _colors;
 
 public:
     // See https://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html

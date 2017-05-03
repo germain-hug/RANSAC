@@ -25,6 +25,11 @@ public:
     /** \brief Get cloud with specific index (const version). */
     DecoratedCloud const& getCloud(int index) const;
 
+    /** \brief Delete cloud with specific index (const version). */
+    void deleteCloud(int index);
+
+    int getCloudSize(){return _clouds.size();};
+
 protected:
     std::vector<DecoratedCloud> _clouds; //!< List of clouds possibly with normals and faces.
 

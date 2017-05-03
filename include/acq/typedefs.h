@@ -29,6 +29,8 @@ typedef Eigen::MatrixXd NormalsT;
 //! Dynamically sized matrix of face vertex indices in rows.
 typedef Eigen::MatrixXi FacesT;
 
+typedef Eigen::MatrixXd ColorT;
+
 /** \brief An associative storage of neighbour indices for point cloud
  * { pointId => [neighbourId_0, nId_1, ... nId_k-1] }
  */
