@@ -117,7 +117,9 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
 
+
         // Store read vertices and faces
+        N.rowwise().normalize();
         cloudManager.addCloud(acq::DecoratedCloud(V, F, N));
 
         // Show mesh

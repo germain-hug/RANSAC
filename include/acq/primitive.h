@@ -56,21 +56,21 @@ namespace acq {
     class Plane : public Primitive {
 
     public:
-        Plane(Eigen::Matrix3d refPoint, Eigen::Matrix3d normal) : _refPoint(refPoint), _normal(normal) {} ;
+        Plane(Eigen::RowVector3d refPoint, Eigen::RowVector3d normal) : _refPoint(refPoint), _normal(normal) {} ;
         ~Plane(){};
 
-        Eigen::Matrix3d getNormal()const{return _normal;}
-        Eigen::Matrix3d getRefPoint()const{return _refPoint;}
-        void setNormal(Eigen::Matrix3d normal){_normal = normal;}
-        void setRefPoint(Eigen::Matrix3d refPoint){_refPoint = refPoint;}
+        Eigen::RowVector3d getNormal()const{return _normal;}
+        Eigen::RowVector3d getRefPoint()const{return _refPoint;}
+        void setNormal(Eigen::RowVector3d normal){_normal = normal;}
+        void setRefPoint(Eigen::RowVector3d refPoint){_refPoint = refPoint;}
 
-        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double threshold, double alpha);
-        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
-        int findBestNumberPoints(Eigen::Matrix3d variance) ;
+        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double T, double alpha);
+        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double T, double alpha);
+        int findBestNumberPoints(Eigen::Matrix3d var, DecoratedCloud& cloud, Eigen::MatrixXi inliers_idx);
 
     private:
-        Eigen::Matrix3d _refPoint;
-        Eigen::Matrix3d _normal;
+        Eigen::RowVector3d _refPoint;
+        Eigen::RowVector3d _normal;
     };
 }
 

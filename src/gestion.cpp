@@ -2,9 +2,8 @@
 
 namespace acq {
 
-// ****** Sample the point cloud and compute its variance *******
-
-// Renvoie matrice d'index de vertices
+//  ****** ============ Helper Functions  =============== ******* 
+// Sample the point cloud 
 Eigen::MatrixXi sample(int cloudSize) {
     Eigen::Matrix<int, 3,1> sampleInd(numberPoint,1) ;
     // add a random indices between 0 and sizeMatrix in a numberPoint sized vector 
@@ -15,7 +14,7 @@ Eigen::MatrixXi sample(int cloudSize) {
     return sampleInd ;
 }
 
-// Return the variance of the point cloud ()
+// Return the variance of the point cloud 
 Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
     // compute the matrix minus the min of each coordinate
     Eigen::MatrixXd centered = V.rowwise() - V.colwise().mean();
@@ -25,7 +24,8 @@ Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
     return cov ;
 }
 
-//  ****** Function to handle a sphere ******* 
+//  ****** ============ Functions to handle a sphere =============== ******* 
+
 // return true if the 3 points create a valid sphere 
 bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold, double alpha) {
     // estimate the center and the radius using 2 points 
@@ -129,5 +129,62 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
     return meanRadius ;
 }
 
+/********* ============= Functions to handle PLANE =============== *********/
+    bool computePlane(Eigen::Matrix3i sample_idx,
+                      Eigen::Matrix3d variance,
+                      DecoratedCloud &cloud,
+                      CloudPrimitive &primitives,
+                      double T) {
+        Eigen::MatrixXd V = cloud.getVertices(), N = cloud.getNormals();
+        const int cloudSize = V.rows();
+        const int nSamples = sample_idx.rows();
+
+        // ---- Retrieve the N vertices and their normals ----
+        Eigen::Matrix3d thisVertex, thisNormal;
+        for (int i = 0; i < 3; i++) {
+            thisVertex.row(i) = V.row(sample_idx(i, 1));
+            thisNormal.row(i) = N.row(sample_idx(i, 1));
+        }
+
+        if (isPlane(thisVertex, thisNormal, T, alpha)) {
+
+            // ---- Create a new plane and compute its score ----
+            Eigen::RowVector3d planeNormal = computeNormal(thisVertex, thisNormal);
+            Eigen::RowVector3d planeRefPoint = V.colwise.mean();
+            Plane newPlane = Plane(planeRefPoint, planeNormal);
+            newPlane.computeScore(variance, cloud, threshold, alpha);
+
+            // ---- Store it in the cloudPrimitive ----
+            primitives.addPrimitive(newPlane);
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    /*** ----------- isPlane() ----------- ***/
+    bool isPlane(Eigen::MatrixXd V, Eigen::MatrixXd N, double T, double alpha) {
+        Eigen::RowVector3d planeNormal = computeNormal(thisVertex, thisNormal);
+        bool isPlane = true;
+        for (int i = 0; i < N.rows(); i++) {
+            if (N.row(i).cross(planeNormal) < T) isPlane = false;
+        }
+        return isPlane;
+    }
+
+    /*** ----------- computeNormal() ----------- ***/
+    Eigen::RowVector3d computeNormal(Eigen::MatrixXd V, Eigen::MatrixXd _N) {
+        Eigen::RowVector3d N = Eigen::RowVector3d::Zero();
+        for (int i = 0; i < V.rows() - 2; i++) {
+            Eigen::RowVector3d P01 = V.row(1 + i) - V.row(i);
+            Eigen::RowVector3d P02 = V.row(2 + i) - V.row(i);
+            N += P02.dot(P01) / (V.rows() - 2);
+        }
+        if (_N.row(0).cross(N) < 0) N = -N;
+        return N;
+    }
+
+
 }
+
 
