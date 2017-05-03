@@ -5,7 +5,8 @@ namespace acq {
 //  ****** ============ Helper Functions  =============== ******* 
 // Sample the point cloud 
 Eigen::MatrixXi sample(int cloudSize) {
-    Eigen::Matrix<int, 3,1> sampleInd(numberPoint,1) ;
+    // we want to have 3 points sampled 
+    Eigen::Matrix<int, 3,1> sampleInd(3,1) ;
     // add a random indices between 0 and sizeMatrix in a numberPoint sized vector 
     for (int i=0; i<3; i++) {
         int newIndex = rand() % (cloudSize + 1) ;
@@ -40,7 +41,7 @@ bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshol
     double test1 = computerRadius(vertices.row(2), thisCenter) - estimatedRadius ;
     double test2 = estimatedNormal.dot(normals.row(2)) ;
 
-    if (test1.abs() < threshold )
+    if (std::abs(test1) < threshold )
         if ( test2 < alpha ) {
             // if the 2 test are true, the 3 points form a sphere  
             return true ; 
@@ -52,7 +53,7 @@ bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshol
 }
 
 // if the 3 points create a sphere, we add it to the primitives 
-bool computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, cloudPrimitive primitives, double threshold, double alpha) {
+bool computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, CloudPrimitive primitives, double threshold, double alpha) {
     Eigen::MatrixXd vertices = cloud.getVertices() ;
     Eigen::MatrixXd normals = cloud.getNormals() ;
     int cloudSize = vertices.rows() ;
@@ -67,9 +68,9 @@ bool computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
     }
 
     // test if it's a sphere
-    bool isSphere = isSphere(thisSampledVertices, thisSampledNormals, threshold, alpha) ;
+    bool is_sphere = isSphere(thisSampledVertices, thisSampledNormals, threshold, alpha) ;
 
-    if (isSphere) {
+    if (is_sphere) {
         // compute the attribut for the object 
         Eigen::Matrix<double, 1,3> thisCenter = computerCenter(thisSampledVertices, thisSampledNormals) ;
         double thisRadius = computerRadius(thisSampledVertices, thisCenter) ;
@@ -92,28 +93,29 @@ bool computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
 
 // compute the center of a shpere by finding the better intersection possible using least square computation
 Eigen::Matrix<double, 1,3> computerCenter(Eigen::MatrixXd vertices, Eigen::MatrixXd normals) {
-    Eigen::MatrixXd::Zero(3,3) R ;
-    Eigen::Matrix<double, 3,1> q ;
-    q = setZero(3,1) ;
+    Eigen::Matrix3d R = Eigen::Matrix3d::Zero(3,3) ;
+    Eigen::Matrix<double, 3,1> q = Eigen::MatrixXd::Zero(3,1) ;
+    Eigen::Matrix3d I = Eigen::Matrix3d::Identity(3,3) ;
 
     int numberPoint = vertices.rows() ;
     Eigen::Matrix<double, 1,3> thisNormal ;
-    Eigen::Matrix<double, 1,3> thisNormal ;
-
+    Eigen::Matrix<double, 1,3> thisPosition ;
 
     // fill the system 
     for (int i = 0; i< numberPoint; i++) {
         thisNormal = normals.row(i) ;
         thisPosition = vertices.row(i) ;
 
-        R += eye(3) - thisNormal.transpose()*thisNormal ; 
+        R += I - thisNormal.transpose()*thisNormal ; 
 
-        q += (eye(3) - thisNormal.transpose()*thisNormal) * thisPosition.transpose() ;
+        q += (I - thisNormal.transpose()*thisNormal) * thisPosition.transpose() ;
     }
 
     // solve the system using least jacobi decomposition 
     Eigen::Matrix<double, 3,1> thisCenter ;
-    thisCenter = R.jacobiSvd(ComputeThinU | ComputeThinV).solve(q) ;
+
+
+    thisCenter = R.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(q) ;
 
     return thisCenter.transpose() ;
 }
@@ -122,10 +124,11 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
     // compute the distance between each point and the center
     int numberPoint = thisVertices.rows() ;
     Eigen::Matrix3d centerArray = thisCenter.replicate(numberPoint,1) ;
-    Eigen::Matrix<double, numberPoint,1> distances = (thisVertices-centerArray).rowwise().norm() ;
+    Eigen::MatrixXd distances(numberPoint,1) ; 
+    distances = (thisVertices-centerArray).rowwise().norm() ;
 
     // compute the mean and return it 
-    double meanRadius = distances.colwise().mean() ;
+    double meanRadius = distances.mean() ;
     return meanRadius ;
 }
 
