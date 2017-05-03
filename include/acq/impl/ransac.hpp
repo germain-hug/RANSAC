@@ -1,5 +1,5 @@
-#ifndef IGLFRAMEWORK_RANSAC_H
-#define IGLFRAMEWORK_RANSAC_H
+#ifndef IGLFRAMEWORK_RANSAC_HPP
+#define IGLFRAMEWORK_RANSAC_HPP
 
 #include "acq/ransac.h"
 
