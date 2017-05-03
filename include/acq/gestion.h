@@ -2,6 +2,7 @@
 #define ACQ_GESTION_H
 
 #include "acq/cloudPrimitive.h"
+#include "acq/cloudManager.h"
 #include "acq/typedefs.h"
 
 #include <Eigen/Dense>
@@ -28,10 +29,10 @@ namespace acq {
     bool isPlane(Eigen::MatrixXd V, Eigen::MatrixXd N, double T, double alpha);
     Eigen::RowVector3d computeNormal(Eigen::MatrixXd V, Eigen::MatrixXd _N);
 
-// pour la matrix de color a la fin :
-
-// pour la matrix de color a la fin :
-   // DecoratedCloud removeCloud(DecoratedCloud cloud, )
+    /********* ============= Functions to handle the final cloud =============== *********/
+     
+    DecoratedCloud fuse(CloudPrimitive& best_primitives, CloudManager& clouds) ;
+    bool cleanCloud(DecoratedCloud& oldCloud, DecoratedCloud& newCloud, Eigen::Matrix3i inliers_idx) ;
 }
 
 #endif
