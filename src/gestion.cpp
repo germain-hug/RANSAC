@@ -243,15 +243,11 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             Eigen::MatrixXd V2 = clouds.getCloud(pr_2).getVertices();
             Eigen::MatrixXd N1 = clouds.getCloud(pr_1).getNormals();
             Eigen::MatrixXd N2 = clouds.getCloud(pr_2).getNormals();
-            Eigen::MatrixXi F1 = clouds.getCloud(pr_1).getFaces();
-            Eigen::MatrixXi F2 = clouds.getCloud(pr_2).getFaces();
             V1 << V1, V2;
             N1 << N1, N2;
-            F1 << F1, (F2.array()+V1.rows());
 
             // Update corresponding Meshes
             clouds.getCloud(pr_1).setVertices(V1);
-            clouds.getCloud(pr_1).setFaces(F1);
             clouds.getCloud(pr_1).setNormals(N1);
         }
         for(int i=0; i<fuses.size(); i++) { // Delete redundant clouds
@@ -260,12 +256,10 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
         // === Build new cloud with color attributes ===
         Eigen::MatrixXd V, C, N;
-        Eigen::MatrixXi F;
 
         for(int i=0; i< clouds.getCloudSize(); i++){
             V << V, clouds.getCloud(i).getVertices();
             N << N, clouds.getCloud(i).getNormals();
-            F << F, clouds.getCloud(i).getFaces();
             C << C, Eigen::RowVector3d(std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX)).replicate(
@@ -275,16 +269,15 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         // ---- Update Cloud ---
         newCloud.setVertices(V);
         newCloud.setColors(C);
-        newCloud.setFaces(F);
         newCloud.setNormals(N);
     };
 
 
-    void cleanCloud(DecoratedCloud& cloudRansac, Eigen::Matrix3i inliers_idx){
+    void cleanCloud(DecoratedCloud& cloudRansac, CloudManager& cloudManager, Eigen::Matrix3i inliers_idx){
         // ---- We remove inliers from cloudRansac -----
-        const int n_cloud = inliers_idx.rows();
-        const int n_inliers = cloudRansac.getVertices().rows();
-        Eigen::MatrixXd V_in;
+        const int n_inliers = inliers_idx.rows();
+        const int n_cloud = cloudRansac.getVertices().rows();
+        Eigen::MatrixXd V_in, V_out;
 
         // ---- For every vertex, search if is an inlier ---
         for(int i=0; i<n_cloud; i++){
@@ -293,14 +286,18 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                 if(inliers_idx(j,0)==i){isValid = false; break;}
             }
 
-            // Vertex is valid, add it to 
+            // Vertex is valid, save it to the current cloud
             if(isValid){
-
+                V_in << V_in, cloudRansac.getVertices().row(i);
+            } else{
+                // Vertex is non valid, add it to cloud of inliers
+                V_out << V_out, cloudRansac.getVertices().row(i);
             }
 
         }
-
-    };
+        cloudManager.addCloud(DecoratedCloud(V_out)); // Store cloud of inliers
+        cloudRansac.setVertices(V_in); // Keep cloud deprived from inliers
+    }
 
 
 }
