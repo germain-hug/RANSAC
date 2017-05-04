@@ -25,7 +25,7 @@ public:
     explicit DecoratedCloud(CloudT const& vertices, NormalsT const& normals);
 
     /** \brief Constructor filling point, face and normal information. */
-    explicit DecoratedCloud(CloudT const& vertices, FacesT const& faces, NormalsT const& normals);
+    explicit DecoratedCloud(CloudT const& vertices, FacesT const& faces, NormalsT const& normals, ColorT const& colors);
 
     /** \brief Getter for point cloud. */
     CloudT const& getVertices() const { return _vertices; }
