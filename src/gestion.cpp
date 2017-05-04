@@ -53,7 +53,7 @@ bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshol
 }
 
 // if the 3 points create a sphere, we add it to the primitives 
-bool computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, CloudPrimitive primitives, double threshold, double alpha) {
+void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, CloudPrimitive& primitives, double threshold, double alpha) {
     Eigen::MatrixXd vertices = cloud.getVertices() ;
     Eigen::MatrixXd normals = cloud.getNormals() ;
     int cloudSize = vertices.rows() ;
@@ -81,13 +81,6 @@ bool computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
 
         // store it in the cloud primitive 
         primitives.addPrimitive(thisSphere) ;
-
-        // the sphere has been accepted : we return true 
-        return true ;
-    }
-
-    else {
-        return false ; 
     }
 }
 
@@ -133,7 +126,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 }
 
 /********* ============= Functions to handle PLANE =============== *********/
-    bool computePlane(Eigen::Matrix<int, 3,1> sample_idx,
+    void computePlane(Eigen::Matrix<int, 3,1> sample_idx,
                       Eigen::Matrix3d variance,
                       DecoratedCloud &cloud,
                       CloudPrimitive &primitives,
@@ -159,10 +152,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
             // ---- Store it in the cloudPrimitive ----
             primitives.addPrimitive(newPlane);
-            return 1;
-        } else {
-            return 0;
-        }
+        } 
     }
 
     /*** ----------- isPlane() ----------- ***/
@@ -190,14 +180,14 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
 
     /********* ============= Functions to handle the final cloud =============== *********/
+    // fuse the cloud with the same primitives 
     void fuse(CloudPrimitive& best_primitives,
               CloudManager& clouds,
-              DecoratedCloud& newCloud,
               double T_rad,  // Radius   Distance Threshold (Sphere)
               double T_cent, // Center   Distance Threshold (Sphere)
               double T_norm, // Normals  Distance Threshold (Plane)
               double T_refPt // RefPoint Distance Threshold (Plane)
-    ){
+    ) {
 
         std::vector<std::pair<int,int>> fuses;
         const int n = best_primitives.getCloudSize();
@@ -253,24 +243,25 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         for(int i=0; i<fuses.size(); i++) { // Delete redundant clouds
             clouds.deleteCloud(fuses.at(i).second);
         }
+    }
 
+    // take a cloudManager and gather all the cloud in one 
+    DecoratedCloud& gatherClouds(CloudManager& cloudManager) {
         // === Build new cloud with color attributes ===
         Eigen::MatrixXd V, C, N;
 
-        for(int i=0; i< clouds.getCloudSize(); i++){
-            V << V, clouds.getCloud(i).getVertices();
-            N << N, clouds.getCloud(i).getNormals();
+        for(int i=0; i< cloudManager.getCloudSize(); i++){
+            V << V, cloudManager.getCloud(i).getVertices();
+            N << N, cloudManager.getCloud(i).getNormals();
             C << C, Eigen::RowVector3d(std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX)).replicate(
-                    clouds.getCloud(i).getFaces().rows(), 1);
+                    cloudManager.getCloud(i).getFaces().rows(), 1);
         }
 
-        // ---- Update Cloud ---
-        newCloud.setVertices(V);
-        newCloud.setColors(C);
-        newCloud.setNormals(N);
-    };
+        // ---- Create new Cloud ---
+        DecoratedCloud newCloud = DecoratedCloud(V,N,C) ;
+    }
 
 
     void cleanCloud(DecoratedCloud& cloudRansac, CloudManager& cloudManager, Eigen::Matrix3i inliers_idx){

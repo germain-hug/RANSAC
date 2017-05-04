@@ -61,5 +61,13 @@ void CloudPrimitive::deletePrimitive(int index) {
     _primitives.erase(_primitives.begin() + index-1);
 }
 
+void CloudPrimitive::clearAllPrimitives() {
+        int size = this->getCloudSize() ;
+        for (int i=0; i<size; i++) {
+            this->deletePrimitive(i) ;
+        }
+}
+
+
 
 } //...ns acq

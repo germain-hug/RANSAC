@@ -47,4 +47,11 @@ namespace acq {
         _clouds.erase(_clouds.begin() + index -1);
     }
 
+    void CloudManager::clearCloud() {
+        int size = this->getCloudSize() ;
+        for (int i=0; i<size; i++) {
+            this->deleteCloud(i) ;
+        }
+    }
+
 } //...ns acq

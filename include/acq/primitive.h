@@ -13,21 +13,25 @@ namespace acq {
     class Primitive {
 
     public:
+        // constructor/destructor
+        Primitive() {} ;
+        virtual ~Primitive() {} ;
+
+        // getters.setters 
         double getScore()const{return _score;}
         int getType()const{return _type;}
         Eigen::MatrixXi getInliers_idx()const{return _inliers_idx;}
-
         void setScore(double score){_score = score;}
         void setInliers_idx(Eigen::MatrixXi inliers_idx){_inliers_idx = inliers_idx;}
 
-        virtual double getRadius();
-        virtual Eigen::Matrix<double, 1,3> getCenter();
-        virtual Eigen::RowVector3d getNormal();
-        virtual Eigen::RowVector3d getRefPoint();
-
+        //
+        virtual double getRadius(){};
+        virtual Eigen::Matrix<double, 1,3> getCenter(){};
+        virtual Eigen::RowVector3d getNormal(){};
+        virtual Eigen::RowVector3d getRefPoint(){};
+        virtual Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha){} ;
 
         void computeScore(Eigen::Matrix3d variance, DecoratedCloud& pointCloud, double threshold, double alpha); 
-        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
         int findBestNumberPoints(Eigen::Matrix3d variance) ;
     
     protected:

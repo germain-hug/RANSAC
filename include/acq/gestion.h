@@ -18,19 +18,20 @@ namespace acq {
     bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold, double alpha) ;
     
     // create and store the sphere when it exists 
-    bool computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, CloudPrimitive& primitives, double threshold, double alpha); 
+    void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, CloudPrimitive& primitives, double threshold, double alpha); 
 
     // compute the attributs using as many points as we have 
     Eigen::Matrix<double, 1,3> computerCenter(Eigen::MatrixXd vertices, Eigen::MatrixXd normals) ;
     double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> thisCenter) ;
 
     /********* ============= Functions to handle PLANE =============== *********/
-    bool computePlane(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud &cloud, CloudPrimitive& primitives, double thresh, double alpha);
+    void computePlane(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud &cloud, CloudPrimitive& primitives, double thresh, double alpha);
     bool isPlane(Eigen::MatrixXd V, Eigen::MatrixXd N, double T, double alpha);
     Eigen::RowVector3d computeNormal(Eigen::MatrixXd V, Eigen::MatrixXd _N);
 
     /********* ============= Functions to handle the final cloud =============== *********/
-    DecoratedCloud fuse(CloudPrimitive& best_primitives, CloudManager& clouds, double T_rad, double T_cent, double T_norm, double T_refPt);
+    void fuse(CloudPrimitive& best_primitives, CloudManager& clouds, double T_rad, double T_cent, double T_norm, double T_refPt);
+    DecoratedCloud& gatherClouds(CloudManager& cloudManager) ;
     void cleanCloud(DecoratedCloud& cloudRansac, CloudManager& cloudManager, Eigen::Matrix3i inliers_idx) ;
 }
 

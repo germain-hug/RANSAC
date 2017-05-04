@@ -25,4 +25,9 @@ DecoratedCloud::DecoratedCloud(CloudT const& vertices, NormalsT const& normals)
     : _vertices(vertices), _normals(normals)
 {}
 
+DecoratedCloud::DecoratedCloud(CloudT const& vertices, NormalsT const& normals, ColorT const& colors)
+    : _vertices(vertices), _normals(normals), _colors(colors)
+{}
+
+
 } //...ns acq

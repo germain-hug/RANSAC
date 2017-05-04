@@ -9,6 +9,11 @@ namespace acq {
 /** Small class to keep track of multiple primitives */
     class CloudPrimitive {
     public:
+
+        // test constructor 
+        CloudPrimitive() {} ;
+        ~CloudPrimitive() {} ;
+
         /** add a primitive to the vector */
         void addPrimitive(Primitive const& primitive);
 
@@ -17,13 +22,15 @@ namespace acq {
 
         /** get back the primitive from a vector  */
         Primitive& getPrimitive(int index);
-        int getCloudSize(){return _primitives.size();};
+        int getCloudSize() {return _primitives.size();};
 
         // find the primitive with the best score : return the index
         int findBestScore() ;
 
         // delete primitive
         void deletePrimitive(int index) ;
+
+        void clearAllPrimitives() ;
 
     protected:
         std::vector<Primitive> _primitives ; 

@@ -13,7 +13,6 @@ namespace acq {
             int bestPrim_idx, nbAllPrim ;
             double best_score ;
 
-
             // compute the variance 
             Eigen::Matrix3d variance = computeVariance(cloud.getVertices()) ;
             // will contain all the primitives created 
@@ -27,8 +26,8 @@ namespace acq {
                     thisSample = sample(numberOfPoint) ;
 
                     // test for the primitive, if they exist : add them in the cloud primitive 
-                    test_thisSphere = computeSphere(thisSample, variance,cloud, allPrimitive, thresh, alpha) ;
-                    test_thisPlane = computeSphere(thisSample, variance,cloud, allPrimitive, thresh, alpha) ;
+                    computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
+                    computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
                 }
                 nbAllPrim = allPrimitive.getCloudSize() ;
                 // if a primitive has been created in the turn 
