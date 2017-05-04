@@ -190,12 +190,13 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
 
     /********* ============= Functions to handle the final cloud =============== *********/
-    DecoratedCloud fuse(CloudPrimitive& best_primitives,
-                        CloudManager& clouds,
-                        double T_rad,  // Radius   Distance Threshold (Sphere)
-                        double T_cent, // Center   Distance Threshold (Sphere)
-                        double T_norm, // Normals  Distance Threshold (Plane)
-                        double T_refPt // RefPoint Distance Threshold (Plane)
+    void fuse(CloudPrimitive& best_primitives,
+              CloudManager& clouds,
+              DecoratedCloud& newCloud,
+              double T_rad,  // Radius   Distance Threshold (Sphere)
+              double T_cent, // Center   Distance Threshold (Sphere)
+              double T_norm, // Normals  Distance Threshold (Plane)
+              double T_refPt // RefPoint Distance Threshold (Plane)
     ){
 
         std::vector<std::pair<int,int>> fuses;
@@ -215,7 +216,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                     // ---- They are both Spheres ---
                     if(first_prim.getType()==1){
                         double d1 = (first_prim.getCenter() - second_prim.getCenter()).norm();
-                        double d2 = first_prim.getRadius() - second_prim.getRadius();
+                        double d2 = std::abs(first_prim.getRadius() - second_prim.getRadius());
                         if(d1 < T_cent && d2 < T_rad){
                             fuses.push_back(std::make_pair(i,j));
                         }
@@ -245,8 +246,9 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             Eigen::MatrixXi F1 = clouds.getCloud(pr_1).getFaces();
             Eigen::MatrixXi F2 = clouds.getCloud(pr_2).getFaces();
             V1 << V1, V2;
-            F1 << F1, F2;
             N1 << N1, N2;
+            F1 << F1, (F2.array()+V1.rows());
+
             // Update corresponding Meshes
             clouds.getCloud(pr_1).setVertices(V1);
             clouds.getCloud(pr_1).setFaces(F1);
@@ -257,7 +259,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         }
 
         // === Build new cloud with color attributes ===
-        DecoratedCloud newCloud;
         Eigen::MatrixXd V, C, N;
         Eigen::MatrixXi F;
 
@@ -271,21 +272,33 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                     clouds.getCloud(i).getFaces().rows(), 1);
         }
 
-
-        { // ---- Update Cloud ---
-            newCloud.setVertices(V);
-            newCloud.setColors(C);
-            newCloud.setFaces(F);
-            newCloud.setNormals(N);
-        }
-        return newCloud;
-
+        // ---- Update Cloud ---
+        newCloud.setVertices(V);
+        newCloud.setColors(C);
+        newCloud.setFaces(F);
+        newCloud.setNormals(N);
     };
 
 
-    bool cleanCloud(DecoratedCloud& oldCloud, DecoratedCloud& newCloud, Eigen::Matrix3i inliers_idx){
-            // New Cloud = Old cloud without the detected Inliers
+    bool cleanCloud(DecoratedCloud& cloudRansac, Eigen::Matrix3i inliers_idx){
+        // ---- We remove inliers from cloudRansac -----
+        const int n_cloud = inliers_idx.rows();
+        const int n_inliers = cloudRansac.getVertices().rows();
+        Eigen::MatrixXd V_in;
 
+        // ---- For every vertex, search if is an inlier ---
+        for(int i=0; i<n_cloud; i++){
+            bool isValid = true;
+            for(int j=0; j<n_inliers; j++){
+                if(inliers_idx(j,0)==i){isValid = false; break;}
+            }
+
+            // Vertex is valid, add it to 
+            if(isValid){
+
+            }
+
+        }
 
     };
 
