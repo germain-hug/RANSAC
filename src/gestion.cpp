@@ -133,7 +133,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 }
 
 /********* ============= Functions to handle PLANE =============== *********/
-    bool computePlane(Eigen::Matrix3i sample_idx,
+    bool computePlane(Eigen::Matrix<int, 3,1> sample_idx,
                       Eigen::Matrix3d variance,
                       DecoratedCloud &cloud,
                       CloudPrimitive &primitives,
@@ -145,8 +145,8 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         // ---- Retrieve the N vertices and their normals ----
         Eigen::Matrix3d thisVertex, thisNormal;
         for (int i = 0; i < 3; i++) {
-            thisVertex.row(i) = V.row(sample_idx(i, 1));
-            thisNormal.row(i) = N.row(sample_idx(i, 1));
+            thisVertex.row(i) = V.row(sample_idx(i, 0));
+            thisNormal.row(i) = N.row(sample_idx(i, 0));
         }
 
         if (isPlane(thisVertex, thisNormal, thresh, alpha)) {

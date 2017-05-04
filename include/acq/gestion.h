@@ -25,13 +25,12 @@ namespace acq {
     double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> thisCenter) ;
 
     /********* ============= Functions to handle PLANE =============== *********/
-    bool computePlane(Eigen::Matrix3i sample_idx, Eigen::Matrix3d variance, DecoratedCloud &cloud, CloudPrimitive& primitives, double thresh, double alpha);
+    bool computePlane(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud &cloud, CloudPrimitive& primitives, double thresh, double alpha);
     bool isPlane(Eigen::MatrixXd V, Eigen::MatrixXd N, double T, double alpha);
     Eigen::RowVector3d computeNormal(Eigen::MatrixXd V, Eigen::MatrixXd _N);
 
     /********* ============= Functions to handle the final cloud =============== *********/
     DecoratedCloud fuse(CloudPrimitive& best_primitives, CloudManager& clouds, double T_rad, double T_cent, double T_norm, double T_refPt);
-
     bool cleanCloud(DecoratedCloud& oldCloud, DecoratedCloud& newCloud, Eigen::Matrix3i inliers_idx) ;
 }
 

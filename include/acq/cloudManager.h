@@ -28,6 +28,7 @@ public:
     /** \brief Delete cloud with specific index (const version). */
     void deleteCloud(int index);
 
+    // get cloud size 
     int getCloudSize(){return _clouds.size();};
 
 protected:

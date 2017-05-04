@@ -43,8 +43,8 @@ namespace acq {
     } //...CloudManager::getCloud() (const)
 
 
-    void &CloudManager::deleteCloud(int index) {
-        _clouds.erase(_clouds.begin() + index);
+    void CloudManager::deleteCloud(int index) {
+        _clouds.erase(_clouds.begin() + index -1);
     }
 
 } //...ns acq
