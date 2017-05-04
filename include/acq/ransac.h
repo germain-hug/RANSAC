@@ -8,7 +8,7 @@
 
 namespace acq {
     void ransac(DecoratedCloud& cloud, CloudPrimitive& best_primitives, CloudManager& cloudManager, 
-                double thresh, double alpha, double thresh_best);
+                double thresh, double alpha, double thresh_best, int iterationsTotal, int numberSample);
 }
 
 #endif

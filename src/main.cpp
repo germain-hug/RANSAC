@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
              
              // apply RANSAC 
              ransac(thisCloud, best_primitives, cloudManagerParts, 
-                thresh, alpha, thresh_best) ;
+                thresh, alpha, thresh_best, nbIteration, samplePerIt) ;
 
             // fuse the result in the new cloud 
             acq::DecoratedCloud& newCloud = gatherClouds(cloudManagerParts) ;
