@@ -77,6 +77,9 @@ int main(int argc, char *argv[]) {
     // Dummy variable to demo GUI
     float floatVariable = 0.1f;
 
+    // ********* VARIABLES FOR THE ALGORITHM  ********* 
+    int nbIteration = 100 ; 
+    int samplePerIt = 5 ;
     // Load a mesh in OFF format
     std::string meshPath = "../models/sphere_cube.obj";
     if (argc > 1) {
@@ -95,7 +98,7 @@ int main(int argc, char *argv[]) {
     viewer.core.show_overlay = false;
 
     // Store cloud so we can store normals later
-    acq::CloudManager cloudManager;
+    acq::CloudManager cloudManagerOldMesh;
     // Read mesh from meshPath
     {
         Eigen::MatrixXd V, TC, N;
@@ -113,33 +116,49 @@ int main(int argc, char *argv[]) {
 
         // Store read vertices and faces
         N.rowwise().normalize();
-        cloudManager.addCloud(acq::DecoratedCloud(V, F, N));
+        cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V, F, N));
 
         // Show mesh
         viewer.data.set_mesh(
-            cloudManager.getCloud(0).getVertices(),
-            cloudManager.getCloud(0).getFaces()
+            cloudManagerOldMesh.getCloud(0).getVertices(),
+            cloudManagerOldMesh.getCloud(0).getFaces()
         );
 
         // Set Normals from OBJ file
-        cloudManager.getCloud(0).setNormals(N);
+        cloudManagerOldMesh.getCloud(0).setNormals(N);
         std::cout << N.size() << std::endl;
 
         // Update viewer
-        acq::setViewerNormals(viewer, cloudManager.getCloud(0).getVertices(), N);
+        acq::setViewerNormals(viewer, cloudManagerOldMesh.getCloud(0).getVertices(), N);
     }
 
     // Extend viewer menu using a lambda function
     viewer.callback_init =
         [
-            &cloudManager, &kNeighbours, &maxNeighbourDist,
+            &cloudManagerOldMesh, &kNeighbours, &maxNeighbourDist,
             &floatVariable, &boolVariable, &dir
         ] (igl::viewer::Viewer& viewer)
     {
         // Add an additional menu window
         viewer.ngui->addWindow(Eigen::Vector2i(900,10), "Acquisition3D");
 
+        // ***** TODO : add different meshes *****
+        viewer.ngui->addGroup("Choose your mesh");
 
+        viewer.ngui->addGroup("Choose the parameters");
+
+        // ask for the number of global iteration  
+        viewer.ngui->addVariable<float>("Number of iteration : ",[&] (double val) {
+                nbIteration = val; 
+                [&]() { 
+                    return nbIteration; 
+        } ); 
+
+        viewer.ngui->addVariable<float>("Sample per iteration : ",[&] (double val) {
+                samplePerIt = val; 
+                [&]() { 
+                    return samplePerIt; 
+        } );        
 
         // Generate menu
         viewer.screen->performLayout();

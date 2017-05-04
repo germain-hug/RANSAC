@@ -6,21 +6,23 @@ namespace acq {
                 double thresh, double alpha, double thresh_best, int iterationsTotal, int numberSample) {
 
             // ****************** INITIALISATION   ***********
-            int numberOfPoint = cloud.getVertices.rows() ; 
-            Eigen::Matrix<int, 3,1> thisSample
+            int numberOfPoint = cloud.getVertices().rows() ; 
+            Eigen::Matrix<int, 3,1> thisSample ;
+            Eigen::MatrixXi thisInliers ; 
             bool prim_detected = false, test_thisSphere, test_thisPlane, test ;
             int bestPrim_idx, nbAllPrim ;
-            Primitive& best_prim ;
             double best_score ;
+
+
             // compute the variance 
             Eigen::Matrix3d variance = computeVariance(cloud.getVertices()) ;
             // will contain all the primitives created 
             CloudPrimitive allPrimitive ;
 
             // create the primitive for this iteration 
-            for (int i=0 ; i<M; i++) {
+            for (int i=0 ; i<iterationsTotal; i++) {
                 // sample the right amount of point 
-                for (int j=0; i<N; j++) {
+                for (int j=0; i<numberSample; j++) {
                     // 
                     thisSample = sample(numberOfPoint) ;
 
@@ -33,19 +35,22 @@ namespace acq {
                 if (nbAllPrim>0) {
                     // get back the best primitive 
                     bestPrim_idx = allPrimitive.findBestScore() ;
-                    best_prim = allPrimitive.getPrimitive(bestPrim_idx) ;
+                    Primitive& best_prim = allPrimitive.getPrimitive(bestPrim_idx) ;
 
                     // test for the score 
-                    best_score = best_prim->getScore() ;
+                    best_score = best_prim.getScore() ;
 
+                    // store the results both in primitives and clou
                     if (best_score > thresh_best) {
                         best_primitives.addPrimitive(best_prim) ;
+                        thisInliers = best_prim.computeInliers(cloud, thresh, alpha) ;
+
+                        cleanCloud(cloud, cloudManager, thisInliers) ;
                     }
-
                 }
-
             }
 
+            // cloudManager and cloudPrimitive contains the result of the function 
     };
 
 }

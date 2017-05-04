@@ -280,7 +280,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
     };
 
 
-    bool cleanCloud(DecoratedCloud& cloudRansac, Eigen::Matrix3i inliers_idx){
+    void cleanCloud(DecoratedCloud& cloudRansac, Eigen::Matrix3i inliers_idx){
         // ---- We remove inliers from cloudRansac -----
         const int n_cloud = inliers_idx.rows();
         const int n_inliers = cloudRansac.getVertices().rows();
