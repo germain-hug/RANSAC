@@ -31,7 +31,7 @@ namespace acq {
 
     /********* ============= Functions to handle the final cloud =============== *********/
     DecoratedCloud fuse(CloudPrimitive& best_primitives, CloudManager& clouds, double T_rad, double T_cent, double T_norm, double T_refPt);
-    bool cleanCloud(DecoratedCloud& oldCloud, DecoratedCloud& newCloud, Eigen::Matrix3i inliers_idx) ;
+    bool cleanCloud(DecoratedCloud& cloudRansac, Eigen::Matrix3i inliers_idx) ;
 }
 
 #endif
