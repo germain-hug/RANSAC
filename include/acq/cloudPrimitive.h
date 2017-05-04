@@ -17,7 +17,6 @@ namespace acq {
 
         /** get back the primitive from a vector  */
         Primitive& getPrimitive(int index);
-
         int getCloudSize(){return _primitives.size();};
 
         // find the primitive with the best score : return the index
