@@ -30,16 +30,22 @@ Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
 // return true if the 3 points create a valid sphere 
 bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold, double alpha) {
     // estimate the center and the radius using 2 points 
+    std::cout << "Enter is sphere" << std::endl ;
+
     Eigen::Matrix<double, 1,3> thisCenter = computerCenter(vertices.topRows(2), normals.topRows(2)) ;
     double estimatedRadius = computerRadius(vertices.topRows(2), thisCenter) ;
+
+    std::cout << "Estimated radius : " << estimatedRadius << std::endl ;
 
     // compute the estimated normal for the least point  
     Eigen::Matrix<double, 1,3> estimatedNormal = vertices.row(2) - thisCenter ;
     estimatedNormal = estimatedNormal.normalized() ;
 
+    std::cout << "Estimated normal : " << estimatedNormal << std::endl ;
+
     // test for the radius 
     double test1 = computerRadius(vertices.row(2), thisCenter) - estimatedRadius ;
-    double test2 = estimatedNormal.dot(normals.row(2)) ;
+    double test2 = estimatedNormal.dot(normals.row(2).normalized()) ;
 
     if (std::abs(test1) < threshold )
         if ( test2 < alpha ) {
@@ -54,6 +60,8 @@ bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshol
 
 // if the 3 points create a sphere, we add it to the primitives 
 void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, CloudPrimitive& primitives, double threshold, double alpha) {
+    std::cout << "Enter compute Sphere " << std::endl ;
+
     Eigen::MatrixXd vertices = cloud.getVertices() ;
     Eigen::MatrixXd normals = cloud.getNormals() ;
     int cloudSize = vertices.rows() ;
@@ -63,12 +71,16 @@ void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
 
     // extract the 3 points sampled by the indices
     for(int i =0 ; i< 3; i++) {
-        thisSampledVertices.row(i) = vertices.row(sample_idx(i,1)) ;
-        thisSampledNormals.row(i) = normals.row(sample_idx(i,1)) ;
+        thisSampledVertices.row(i) = vertices.row(sample_idx(i,0)) ;
+        thisSampledNormals.row(i) = normals.row(sample_idx(i,0)) ;
     }
+    std::cout << "sample vertices : " << thisSampledNormals << std::endl ;
+    std::cout << "sample normal : " << thisSampledNormals << std::endl ;
 
     // test if it's a sphere
     bool is_sphere = isSphere(thisSampledVertices, thisSampledNormals, threshold, alpha) ;
+
+    std::cout << "Test for this sphere sample : " << is_sphere << std::endl ;
 
     if (is_sphere) {
         // compute the attribut for the object 
@@ -131,6 +143,9 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                       DecoratedCloud &cloud,
                       CloudPrimitive &primitives,
                       double thresh, double alpha) {
+
+    std::cout << "Enter compute plan " << std::endl ;
+        
         Eigen::MatrixXd V = cloud.getVertices(), N = cloud.getNormals();
         const int cloudSize = V.rows();
         const int nSamples = sample_idx.rows();
@@ -142,13 +157,23 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             thisNormal.row(i) = N.row(sample_idx(i, 0));
         }
 
+        std::cout << "Initialisation OK  " << std::endl ;
+
         if (isPlane(thisVertex, thisNormal, thresh, alpha)) {
+            std::cout << "Plane detected" << std::endl ;
 
             // ---- Create a new plane and compute its score ----
-            Eigen::RowVector3d planeNormal = computeNormal(thisVertex, thisNormal);
-            Eigen::RowVector3d planeRefPoint = V.colwise().mean();
+            Eigen::Matrix<double, 1,3> planeNormal = computeNormal(thisVertex, thisNormal);
+            std::cout << "Normal computed : "<< planeNormal << std::endl ;
+
+            Eigen::Matrix<double, 1,3> planeRefPoint = V.colwise().mean();
+            std::cout << "Ref point computed : "<< planeRefPoint << std::endl ;
+
             Plane newPlane = Plane(planeRefPoint, planeNormal);
+            std::cout << "Plane created "<< std::endl ;
+
             newPlane.computeScore(variance, cloud, thresh, alpha);
+            std::cout << "Score computed "<< std::endl ;
 
             // ---- Store it in the cloudPrimitive ----
             primitives.addPrimitive(newPlane);
@@ -157,7 +182,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
     /*** ----------- isPlane() ----------- ***/
     bool isPlane(Eigen::MatrixXd V, Eigen::MatrixXd N, double T, double alpha) {
-        Eigen::RowVector3d planeNormal = computeNormal(V, N);
+        Eigen::Matrix<double, 1,3> planeNormal = computeNormal(V, N);
         bool isPlane = true;
         for (int i = 0; i < N.rows(); i++) {
             if (N.row(i).dot(planeNormal) < T) isPlane = false;
@@ -166,15 +191,18 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
     }
 
     /*** ----------- computeNormal() ----------- ***/
-    Eigen::RowVector3d computeNormal(Eigen::MatrixXd V, Eigen::MatrixXd _N) {
-        Eigen::RowVector3d N = Eigen::RowVector3d::Zero();
+    Eigen::Matrix<double, 1,3> computeNormal(Eigen::MatrixXd V, Eigen::Matrix<double, 1,3> _N) {
+        Eigen::Matrix<double, 1,3> N = Eigen::Zero(1,3) ;
+        Eigen::Matrix<double, 1,3> P01, P02 ;
+
         for (int i = 0; i < V.rows() - 2; i++) {
-            Eigen::RowVector3d P01 = V.row(1 + i) - V.row(i);
-            Eigen::RowVector3d P02 = V.row(2 + i) - V.row(i);
+            P01 = V.row(1 + i) - V.row(i);
+            P02 = V.row(2 + i) - V.row(i);
+
             N += P02.cross(P01) / (V.rows() - 2);
         }
-        if (_N.row(0).dot(N) < 0) N = -N;
-        return N;
+        if (_N.dot(N) < 0) N = -N;
+        return N.normalized() ;
     }
 
 

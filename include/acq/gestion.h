@@ -6,6 +6,7 @@
 #include "acq/typedefs.h"
 
 #include <Eigen/Dense>
+#include <iostream>
 
 namespace acq {
 
@@ -27,7 +28,7 @@ namespace acq {
     /********* ============= Functions to handle PLANE =============== *********/
     void computePlane(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud &cloud, CloudPrimitive& primitives, double thresh, double alpha);
     bool isPlane(Eigen::MatrixXd V, Eigen::MatrixXd N, double T, double alpha);
-    Eigen::RowVector3d computeNormal(Eigen::MatrixXd V, Eigen::MatrixXd _N);
+    Eigen::Matrix<double, 1,3> computeNormal(Eigen::MatrixXd V, Eigen::Matrix<double, 1,3> _N);
 
     /********* ============= Functions to handle the final cloud =============== *********/
     void fuse(CloudPrimitive& best_primitives, CloudManager& clouds, double T_rad, double T_cent, double T_norm, double T_refPt);

@@ -213,9 +213,12 @@ int main(int argc, char *argv[]) {
 
           viewer.ngui->addButton("RANSAC",
                                [&]() {
-            // set the vertices 
+            // set the vertices
+            
+            std::cout << "Get back the cloud before" << std::endl ;
              acq::DecoratedCloud& thisCloud = cloudManagerOldMesh.getCloud(typeMesh) ;
-             
+            std::cout << "Get back the cloud after" << std::endl ;
+
              // apply RANSAC 
              ransac(thisCloud, best_primitives, cloudManagerParts, 
                 thresh, alpha, thresh_best, nbIteration, samplePerIt) ;

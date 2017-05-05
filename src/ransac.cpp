@@ -5,6 +5,8 @@ namespace acq {
     void ransac(DecoratedCloud &cloud, CloudPrimitive &best_primitives, CloudManager &cloudManager, 
                 double thresh, double alpha, double thresh_best, int iterationsTotal, int numberSample) {
 
+            std::cout << "Inter into ransac" << std::endl ;
+
             // ****************** INITIALISATION   ***********
             int numberOfPoint = cloud.getVertices().rows() ; 
             Eigen::Matrix<int, 3,1> thisSample ;
@@ -13,21 +15,36 @@ namespace acq {
             int bestPrim_idx, nbAllPrim ;
             double best_score ;
 
+            std::cout << "Variable initialized" << std::endl ;
+
             // compute the variance 
             Eigen::Matrix3d variance = computeVariance(cloud.getVertices()) ;
+
+            std::cout << "Variance : " << variance << std::endl ;
+
             // will contain all the primitives created 
             CloudPrimitive allPrimitive ;
+
+            std::cout << "CloudPrimitive created " << std::endl ;
 
             // create the primitive for this iteration 
             for (int i=0 ; i<iterationsTotal; i++) {
                 // sample the right amount of point 
                 for (int j=0; i<numberSample; j++) {
-                    // 
+                    // sample the point 
                     thisSample = sample(numberOfPoint) ;
+
+                     std::cout << "Sample idx :  " << thisSample << std::endl ;
 
                     // test for the primitive, if they exist : add them in the cloud primitive 
                     computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
+
+                    std::cout << "Sphere test OK pour i= "<< i << "et j "<< j << std::endl ;
+
                     computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
+                    
+                    std::cout << "Plan test OK  pour i= "<< i << "et j "<< j <<  std::endl ;
+
                 }
                 nbAllPrim = allPrimitive.getCloudSize() ;
                 // if a primitive has been created in the turn 

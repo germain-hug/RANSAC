@@ -6,6 +6,7 @@
 
 #include <math.h>
 #include <cmath>
+#include <iostream>
 
 namespace acq {
 
@@ -35,7 +36,8 @@ namespace acq {
         int findBestNumberPoints(Eigen::Matrix3d variance) ;
     
     protected:
-        double _score; int _type; // 1: Sphere, 2: Plane
+        double _score; 
+        int _type; // 1: Sphere, 2: Plane
         Eigen::MatrixXi _inliers_idx;
     };
 
@@ -67,21 +69,21 @@ namespace acq {
     class Plane : public Primitive {
 
     public:
-        Plane(Eigen::RowVector3d refPoint, Eigen::RowVector3d normal, int _type = 2) : _refPoint(refPoint), _normal(normal) {} ;
+        Plane(Eigen::Matrix<double, 1,3> refPoint, Eigen::Matrix<double, 1,3> normal, int _type = 2) : _refPoint(refPoint), _normal(normal) {} ;
         ~Plane(){};
 
-        Eigen::RowVector3d getNormal()const{return _normal;}
-        Eigen::RowVector3d getRefPoint()const{return _refPoint;}
-        void setNormal(Eigen::RowVector3d normal){_normal = normal;}
-        void setRefPoint(Eigen::RowVector3d refPoint){_refPoint = refPoint;}
+        Eigen::Matrix<double, 1,3> getNormal()const{return _normal;}
+        Eigen::Matrix<double, 1,3> getRefPoint()const{return _refPoint;}
+        void setNormal(Eigen::Matrix<double, 1,3> normal){_normal = normal;}
+        void setRefPoint(Eigen::Matrix<double, 1,3>) refPoint){_refPoint = refPoint;}
 
         void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double T, double alpha);
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double T, double alpha);
-        int findBestNumberPoints(Eigen::Matrix3d var, DecoratedCloud& cloud, Eigen::MatrixXi inliers_idx);
+        int findBestNumberPoints(Eigen::Matrix3d var, DecoratedCloud& cloud,Eigen::MatrixXi inliers_idx);
 
     private:
-        Eigen::RowVector3d _refPoint;
-        Eigen::RowVector3d _normal;
+        Eigen::Matrix<double, 1,3> _refPoint;
+        Eigen::Matrix<double, 1,3> _normal;
     };
 }
 

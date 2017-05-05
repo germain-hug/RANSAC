@@ -55,7 +55,7 @@ namespace acq {
             if (std::abs(test1) < threshold ) {
                 if ( test2 < alpha ) {
                     // if the 2 test are true, the point is an inlier 
-                    inliers_idx(index_inliers,1) = i ;
+                    inliers_idx(index_inliers,0) = i ;
                     index_inliers += 1 ; 
                 }
             }   
