@@ -7,7 +7,7 @@ namespace acq {
         std::cout << "Entered in compute score "<< std::endl ;
 
         // --- Compute the Plane Inliers ---
-        Eigen::MatrixXi inliers_idx =  this->computeInliers(cloud,T,alpha) ;
+        Eigen::MatrixXi inliers_idx =  this->computeInliersPlane(cloud,T,alpha) ;
         this->setInliers_idx(inliers_idx) ;
         std::cout << "Inliers set " << std::endl ;
 
@@ -18,9 +18,7 @@ namespace acq {
         std::cout << "optimalInliers : " << optimalInliers << " | inliers_idx.rows(): "<< inliers_idx.rows() << std::endl ;
 
         // --- Compute the plane score ---
-        //double score = (double(inliers_idx.rows())/double(optimalInliers))*100.0;
-
-
+        //if the number are closed, the score is high, otherwise it's low
         double score = 100.0 - double(std::abs(inliers_idx.rows()-optimalInliers)) /
                 double(std::max(int(inliers_idx.rows()),optimalInliers))*100;
 
@@ -84,7 +82,9 @@ namespace acq {
     }
 
     /// ------- computeInliers() ------
-    Eigen::MatrixXi Plane::computeInliers(DecoratedCloud& cloud, double T, double alpha) {
+    Eigen::MatrixXi Plane::computeInliersPlane(DecoratedCloud& cloud, double T, double alpha) {
+        std::cout << "ah coucou debut func" << std::endl ;
+        
         int numberPoint = cloud.getVertices().rows() ;
         Eigen::Matrix<double, 1, 3> N = this->getNormal();
         Eigen::Matrix<double, 1, 3> P = this->getRefPoint();
@@ -109,7 +109,7 @@ namespace acq {
                 idx_counter++;
             }
         }
-
+        std::cout << "Number index : " << idx_counter << std::endl ;
         inliers_idx = inliers_idx.topRows(idx_counter-1) ;
         return inliers_idx ;
     }

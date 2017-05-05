@@ -78,11 +78,11 @@ int main(int argc, char *argv[]) {
     float floatVariable = 0.1f;
 
     // ********* VARIABLES FOR THE ALGORITHM  ********* 
-    int nbIteration = 100 ; 
+    int nbIteration = 5 ; 
     int samplePerIt = 5 ;
     double thresh = 0.002 ;
-    double alpha = 0.05 ;
-    double thresh_best = 70.0 ;
+    double alpha = 0.60 ;
+    double thresh_best = 50.0 ;
     // will store the current primitives and the point cloud per primitives
     acq::CloudPrimitive best_primitives ;
     acq::CloudManager cloudManagerParts ;
@@ -214,15 +214,13 @@ int main(int argc, char *argv[]) {
           viewer.ngui->addButton("RANSAC",
                                [&]() {
             // set the vertices
-            
-            std::cout << "Get back the cloud before" << std::endl ;
-             acq::DecoratedCloud& thisCloud = cloudManagerOldMesh.getCloud(typeMesh) ;
-            std::cout << "Get back the cloud after" << std::endl ;
+            acq::DecoratedCloud& thisCloud = cloudManagerOldMesh.getCloud(typeMesh) ;
 
              // apply RANSAC 
-             ransac(thisCloud, best_primitives, cloudManagerParts, 
+             bool ransacSuccess = ransac(thisCloud, best_primitives, cloudManagerParts, 
                 thresh, alpha, thresh_best, nbIteration, samplePerIt) ;
 
+                if (ransacSuccess) {
             // fuse the result in the new cloud 
             acq::DecoratedCloud& newCloud = gatherClouds(cloudManagerParts) ;
 
@@ -235,7 +233,10 @@ int main(int argc, char *argv[]) {
             );
 
              viewer.data.set_colors(newCloud.getColors());
-
+                }
+                else {
+                    std::cout << "RANSAC didn't find any primitive" << std::endl ;
+                }
         });
 
           viewer.ngui->addButton("Primitive fusion",

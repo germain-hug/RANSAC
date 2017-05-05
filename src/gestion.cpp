@@ -7,9 +7,19 @@ namespace acq {
 Eigen::MatrixXi sample(int cloudSize) {
     // we want to have 3 points sampled 
     Eigen::Matrix<int, 3,1> sampleInd(3,1) ;
+    int newIndex ;
     // add a random indices between 0 and sizeMatrix in a numberPoint sized vector 
     for (int i=0; i<3; i++) {
-        int newIndex = rand() % (cloudSize + 1) ;
+        bool isUnique = false;
+        while(!isUnique){
+            newIndex = rand() % (cloudSize + 1) ;
+            isUnique = true;
+            for(int j=0; j<i; j++) {
+                if(sampleInd(j)==newIndex){
+                    isUnique = false;
+                }
+            }
+        }
         sampleInd(i) = newIndex ;
     }
     return sampleInd ;
@@ -90,6 +100,7 @@ void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
         // create the object and compute its score 
         Sphere thisSphere = Sphere(thisRadius, thisCenter) ;
         thisSphere.computeScore(variance, cloud, threshold, alpha) ;
+        thisSphere.setType(1) ;
 
         // store it in the cloud primitive 
         primitives.addPrimitive(thisSphere) ;
@@ -142,10 +153,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                       Eigen::Matrix3d variance,
                       DecoratedCloud &cloud,
                       CloudPrimitive &primitives,
-                      double thresh, double alpha) {
-
-    std::cout << "Enter compute plan " << std::endl ;
-        
+                      double thresh, double alpha) {        
         Eigen::MatrixXd V = cloud.getVertices(), N = cloud.getNormals();
         const int cloudSize = V.rows();
         const int nSamples = sample_idx.rows();
@@ -158,17 +166,13 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             thisNormal.row(i) = N.row(sample_idx(i, 0));
         }
 
-        std::cout << "thisVertex():" << thisVertex << std::endl;
-
-
-        std::cout << "Initialisation OK  " << std::endl ;
+        std::cout << "thisVertex(): " << thisVertex << std::endl;
 
         if (isPlane(thisVertex, thisNormal, thresh, alpha)) {
             std::cout << "Plane detected" << std::endl ;
 
             // ---- Create a new plane and compute its score ----
             Eigen::Matrix<double, 1,3> planeNormal = computeNormal(thisVertex, thisNormal.row(0));
-            std::cout << "Normal computed : "<< planeNormal << std::endl ;
 
             Eigen::Matrix<double, 1,3> planeRefPoint = V.colwise().mean();
             std::cout << "Ref point computed : "<< planeRefPoint << std::endl ;
@@ -178,6 +182,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
             newPlane.computeScore(variance, cloud, thresh, alpha);
             std::cout << "Score computed "<< std::endl ;
+            newPlane.setType(2) ;
 
             // ---- Store it in the cloudPrimitive ----
             primitives.addPrimitive(newPlane);
@@ -212,6 +217,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         // Normalize
         if(N(0,0)!=0 && N(0,1)!=0 && N(0,2)!=0) N = N.normalized();
 
+        std::cout << "Normal Computed : " << N << std::endl ;
         return N;
     }
 

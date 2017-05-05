@@ -3,7 +3,7 @@
 namespace acq {
     void Sphere::computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double threshold, double alpha) {
         // compute the inliers 
-        Eigen::MatrixXi inliers_idx =  this->computeInliers(cloud,threshold, alpha) ;
+        Eigen::MatrixXi inliers_idx =  this->computeInliersSphere(cloud,threshold, alpha) ;
 
         // set the inliers for this primitive 
         this->setInliers_idx(inliers_idx) ;
@@ -30,7 +30,7 @@ namespace acq {
         return numberPoints ;
     }
 
-    Eigen::MatrixXi Sphere::computeInliers(DecoratedCloud& cloud, double threshold, double alpha) {
+    Eigen::MatrixXi Sphere::computeInliersSphere(DecoratedCloud& cloud, double threshold, double alpha) {
         int numberPoint = cloud.getVertices().rows() ;
         Eigen::Matrix<double, 1,3> thisVertice, thisNormal, estimatedNormal ;
         int index_inliers = 0 ;
