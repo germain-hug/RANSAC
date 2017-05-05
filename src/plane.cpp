@@ -8,7 +8,6 @@ namespace acq {
 
         // --- Compute the Plane Inliers ---
         Eigen::MatrixXi inliers_idx =  this->computeInliers(cloud,T,alpha) ;
-        std::cout << "Inliers : "<< inliers_idx << std::endl ;
         this->setInliers_idx(inliers_idx) ;
         std::cout << "Inliers set " << std::endl ;
 
@@ -16,11 +15,16 @@ namespace acq {
         // --- Estimate the density of our plane ---
         int optimalInliers = this->findBestNumberPoints(var, cloud, inliers_idx) ;
 
-        std::cout << "Best number of point : " << optimalInliers << std::endl ;
+        std::cout << "optimalInliers : " << optimalInliers << " | inliers_idx.rows(): "<< inliers_idx.rows() << std::endl ;
 
         // --- Compute the plane score ---
-        double score = (double(inliers_idx.rows())/double(optimalInliers))*100.0 ;
-        std::cout << "Score finam : " << score << std::endl ;
+        //double score = (double(inliers_idx.rows())/double(optimalInliers))*100.0;
+
+
+        double score = 100.0 - double(std::abs(inliers_idx.rows()-optimalInliers)) /
+                double(std::max(int(inliers_idx.rows()),optimalInliers))*100;
+
+        std::cout << "Score final : " << score << "%" << std::endl ;
 
         // --- Set the score for this primitive ---
         this->setScore(score) ;
@@ -33,12 +37,11 @@ namespace acq {
         std::cout << "Entered in find best number points "<< std::endl ;
 
         // --- Find an orthonormal basis of the plane ---
-        Eigen::Matrix<double, 1,3> N = this->getNormal();
-        Eigen::Matrix<double, 1,3> u(-N(0,1),N(0,0),0.0) ;
-
-        std::cout << "u : " << u << std::endl ;
+        Eigen::Matrix<double, Eigen::Dynamic, 3> N(1, 3); N = this->getNormal();
+        Eigen::Matrix<double, Eigen::Dynamic, 3> u(1, 3); u << -N(0,1), N(0,0), 0.0;
         u.normalize();
-        Eigen::Matrix<double, 1,3> v = u.cross(N); 
+
+        Eigen::MatrixXd v = u.row(0).cross(N.row(0));
         v.normalize();
 
         std::cout << "Basis for the point u : " << u << "and v : " << v << std::endl ;
@@ -46,14 +49,14 @@ namespace acq {
         // --- Retrieve Inliers and project on (u,v) basis ---
         const int n = inliers_idx.rows();
         Eigen::MatrixXd inliers2D(n, 2);
-        Eigen::Matrix<double, 1,3> this_vertex ;
+        Eigen::MatrixXd this_vertex ;
         int idx ;
 
         for(int i = 0; i<n; i++){
             idx = inliers_idx(i,0);
             this_vertex = cloud.getVertices().row(idx);
-            inliers2D(i,0) = u.dot(this_vertex);
-            inliers2D(i,1) = v.dot(this_vertex);
+            inliers2D(i,0) = u.row(0).dot(this_vertex.row(0));
+            inliers2D(i,1) = v.row(0).dot(this_vertex.row(0));
         }
         std::cout << "Inliers 2D OK " << std::endl ;
 
@@ -65,23 +68,26 @@ namespace acq {
 
         double thisArea = std::abs(y_max-y_min)*std::abs(x_max-x_min);
 
-        std::cout << "this Area : " << thisArea << std::endl ;
+        std::cout << "this Area : " << thisArea << std::endl;
 
         // --- Estimate Optimal Number of Points ---
-        double meanVariance = (var(1,1)+var(2,2)+var(3,3))/3.0 ;
-        int numberPoints = floor(thisArea/pow(meanVariance, 2.0)) ;
+        double var_x = u.row(0).dot(var.diagonal());
+        double var_y = v.row(0).dot(var.diagonal());
+        double meanVariance = sqrt(pow(var_x,2.0)+pow(var_y,2.0));
+
+        std::cout << "mean var" << meanVariance << std::endl;
+        int numberPoints = floor(thisArea/(meanVariance));
+        std::cout << "final number of point : " << numberPoints << std::endl;
 
         return numberPoints ;
-
-        std::cout << "final number of point : " << numberPoints << std::endl ;
 
     }
 
     /// ------- computeInliers() ------
     Eigen::MatrixXi Plane::computeInliers(DecoratedCloud& cloud, double T, double alpha) {
         int numberPoint = cloud.getVertices().rows() ;
-        Eigen::RowVector3d N = this->getNormal();
-        Eigen::RowVector3d P = this->getRefPoint();
+        Eigen::Matrix<double, 1, 3> N = this->getNormal();
+        Eigen::Matrix<double, 1, 3> P = this->getRefPoint();
 
         double d = N.dot(P);
         const long n = cloud.getVertices().rows() ;

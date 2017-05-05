@@ -7,6 +7,8 @@
 #include <math.h>
 #include <cmath>
 #include <iostream>
+#include <Eigen/Dense>
+
 
 namespace acq {
 
@@ -75,7 +77,7 @@ namespace acq {
         Eigen::Matrix<double, 1,3> getNormal()const{return _normal;}
         Eigen::Matrix<double, 1,3> getRefPoint()const{return _refPoint;}
         void setNormal(Eigen::Matrix<double, 1,3> normal){_normal = normal;}
-        void setRefPoint(Eigen::Matrix<double, 1,3>) refPoint){_refPoint = refPoint;}
+        void setRefPoint(Eigen::Matrix<double, 1,3> refPoint){_refPoint = refPoint;}
 
         void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double T, double alpha);
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double T, double alpha);

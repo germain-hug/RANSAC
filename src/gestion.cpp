@@ -150,6 +150,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         const int cloudSize = V.rows();
         const int nSamples = sample_idx.rows();
 
+
         // ---- Retrieve the N vertices and their normals ----
         Eigen::Matrix3d thisVertex, thisNormal;
         for (int i = 0; i < 3; i++) {
@@ -157,13 +158,16 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             thisNormal.row(i) = N.row(sample_idx(i, 0));
         }
 
+        std::cout << "thisVertex():" << thisVertex << std::endl;
+
+
         std::cout << "Initialisation OK  " << std::endl ;
 
         if (isPlane(thisVertex, thisNormal, thresh, alpha)) {
             std::cout << "Plane detected" << std::endl ;
 
             // ---- Create a new plane and compute its score ----
-            Eigen::Matrix<double, 1,3> planeNormal = computeNormal(thisVertex, thisNormal);
+            Eigen::Matrix<double, 1,3> planeNormal = computeNormal(thisVertex, thisNormal.row(0));
             std::cout << "Normal computed : "<< planeNormal << std::endl ;
 
             Eigen::Matrix<double, 1,3> planeRefPoint = V.colwise().mean();
@@ -182,7 +186,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
     /*** ----------- isPlane() ----------- ***/
     bool isPlane(Eigen::MatrixXd V, Eigen::MatrixXd N, double T, double alpha) {
-        Eigen::Matrix<double, 1,3> planeNormal = computeNormal(V, N);
+        Eigen::Matrix<double, 1,3> planeNormal = computeNormal(V, N.row(0));
         bool isPlane = true;
         for (int i = 0; i < N.rows(); i++) {
             if (N.row(i).dot(planeNormal) < T) isPlane = false;
@@ -192,17 +196,23 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
     /*** ----------- computeNormal() ----------- ***/
     Eigen::Matrix<double, 1,3> computeNormal(Eigen::MatrixXd V, Eigen::Matrix<double, 1,3> _N) {
-        Eigen::Matrix<double, 1,3> N = Eigen::Zero(1,3) ;
+        Eigen::Matrix<double, 1,3> N; N << 0.0,0.0,0.0;
         Eigen::Matrix<double, 1,3> P01, P02 ;
 
         for (int i = 0; i < V.rows() - 2; i++) {
             P01 = V.row(1 + i) - V.row(i);
             P02 = V.row(2 + i) - V.row(i);
-
+            std::cout << "P01: " << P01 << " | P02: " << P02 <<  std::endl;
+            std::cout << " V: " << V << std::endl;
             N += P02.cross(P01) / (V.rows() - 2);
         }
+
+        // Check for normal orientation
         if (_N.dot(N) < 0) N = -N;
-        return N.normalized() ;
+        // Normalize
+        if(N(0,0)!=0 && N(0,1)!=0 && N(0,2)!=0) N = N.normalized();
+
+        return N;
     }
 
 
