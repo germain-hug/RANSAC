@@ -39,11 +39,11 @@ namespace acq {
                 nbAllPrim = allPrimitive.getCloudSize() ;
                         std::cout << "nb prim : "<< nbAllPrim << std::endl ; 
 
-
                 // if a primitive has been created in the turn 
                 if (nbAllPrim>0) {
                     // get back the best primitive 
                     bestPrim_idx = allPrimitive.findBestScore() ;
+
                     Primitive& best_prim = allPrimitive.getPrimitive(bestPrim_idx) ;
 
                     // test for the score 
@@ -60,13 +60,13 @@ namespace acq {
 
                          std::cout << " type " << thisType << std::endl ; 
 
-
                         if(thisType==1) {
-                            thisInliers = best_prim.computeInliersSphere(cloud, thresh, alpha) ;
+                            Sphere& thisPrime = dynamic_cast<Sphere&>(best_prim);  
+                            thisInliers = thisPrime.computeInliersSphere(cloud, thresh, alpha) ;
                         } 
                         else if(thisType==2) {
-                            std::cout << "ah coucou" << std::endl ;
-                            thisInliers = best_prim.computeInliersPlane(cloud, thresh, alpha) ;
+                            Plane& thisPrime = dynamic_cast<Plane&>(best_prim);  
+                            thisInliers = thisPrime.computeInliersPlane(cloud, thresh, alpha) ;
                             std::cout << " Inliers computed  " << thisInliers << std::endl ; 
                         }
 

@@ -249,15 +249,22 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
                     // ---- They are both Spheres ---
                     if(first_prim.getType()==1){
-                        double d1 = (first_prim.getCenter() - second_prim.getCenter()).norm();
-                        double d2 = std::abs(first_prim.getRadius() - second_prim.getRadius());
+                        // we cast (try) 
+                        Sphere& sphere1 = dynamic_cast<Sphere&>(first_prim);  
+                        Sphere& sphere2 = dynamic_cast<Sphere&>(second_prim);  
+
+                        double d1 = (sphere1.getCenter() - sphere2.getCenter()).norm();
+                        double d2 = std::abs(sphere1.getRadius() - sphere2.getRadius());
                         if(d1 < T_cent && d2 < T_rad){
                             fuses.push_back(std::make_pair(i,j));
                         }
                     }// ---- They are both Planes ---
                     else{
-                        double d1 = (first_prim.getNormal().dot(second_prim.getNormal()));
-                        double d2 = (first_prim.getRefPoint() - second_prim.getRefPoint()).dot(first_prim.getNormal());
+                        Plane& plane1 = dynamic_cast<Plane&>(first_prim);  
+                        Plane& plane2 = dynamic_cast<Plane&>(second_prim);  
+
+                        double d1 = (plane1.getNormal().dot(plane2.getNormal()));
+                        double d2 = (plane1.getRefPoint() - plane2.getRefPoint()).dot(plane1.getNormal());
                         if(d1 < T_norm && d2 < T_refPt){
                             fuses.push_back(std::make_pair(i,j));
                         }
@@ -305,6 +312,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
         // ---- Create new Cloud ---
         DecoratedCloud newCloud = DecoratedCloud(V,N,C) ;
+        return newCloud ;
     }
 
 
