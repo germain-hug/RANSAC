@@ -127,7 +127,47 @@ int main(int argc, char *argv[]) {
 
         // Store read vertices and faces
         N.rowwise().normalize();
-        cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V, F, N));
+
+        acq::DecoratedCloud cloud = acq::DecoratedCloud(V, F, N) ;
+
+        cloud.setNormals(
+                acq::recalcNormals(
+                        /* [in]      K-neighbours for FLANN: */ kNeighbours,
+                        /* [in]             Vertices matrix: */ cloud.getVertices(),
+                        /* [in]      max neighbour distance: */ maxNeighbourDist
+                )
+        );
+
+        // Estimate neighbours using FLANN
+        acq::NeighboursT const neighbours =
+                acq::calculateCloudNeighboursFromFaces(
+                        /* [in] Faces: */ cloud.getFaces()
+                );
+
+        // Estimate normals for points in cloud vertices
+        cloud.setNormals(
+                acq::calculateCloudNormals(
+                        /* [in]               Cloud: */ cloud.getVertices(),
+                        /* [in] Lists of neighbours: */ neighbours
+                )
+        );
+
+        int nFlips =
+                acq::orientCloudNormalsFromFaces(
+                        /* [in    ] Lists of neighbours: */ cloud.getFaces(),
+                        /* [in,out]   Normals to change: */ cloud.getNormals()
+                );
+        std::cout << "nFlips: " << nFlips << "/" << cloud.getNormals().size() << "\n";
+
+        // Update viewer
+        acq::setViewerNormals(
+                /* [in, out] Viewer to update: */ viewer,
+                /* [in]            Pointcloud: */ cloud.getVertices(),
+                /* [in] Normals of Pointcloud: */ cloud.getNormals()
+        );
+
+        cloudManagerOldMesh.addCloud(cloud);
+
 
         // Show mesh
         viewer.data.set_mesh(

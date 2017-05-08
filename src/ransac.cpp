@@ -32,8 +32,8 @@ namespace acq {
                     thisSample = sample(numberOfPoint) ;
 
                     // test for the primitive, if they exist : add them in the cloud primitive 
-                    // computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
-                    computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
+                     computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
+                    //computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
                 }
 
                 nbAllPrim = allPrimitive.getCloudSize() ;
@@ -43,11 +43,10 @@ namespace acq {
                 if (nbAllPrim>0) {
                     // get back the best primitive 
                     bestPrim_idx = allPrimitive.findBestScore() ;
-
-                    Primitive& best_prim = allPrimitive.getPrimitive(bestPrim_idx) ;
+                    Primitive* best_prim = allPrimitive.getPrimitive(bestPrim_idx) ;
 
                     // test for the score 
-                    best_score = best_prim.getScore() ;
+                    best_score = best_prim->getScore() ;
 
                     // store the results both in primitives and clou
                     if (best_score > thresh_best) {
@@ -56,20 +55,13 @@ namespace acq {
                         best_primitives.addPrimitive(best_prim) ;
 
                         std::cout << "cloud size : " <<best_primitives.getCloudSize() << std::endl ; 
-                        int thisType = best_prim.getType() ;
+                        int thisType = best_prim->getType() ;
 
-                         std::cout << " type " << thisType << std::endl ; 
+                        std::cout << " type " << thisType << std::endl ;
 
-                        if(thisType==1) {
-                            Sphere& thisPrime = dynamic_cast<Sphere&>(best_prim);  
-                            thisInliers = thisPrime.computeInliersSphere(cloud, thresh, alpha) ;
-                        } 
-                        else if(thisType==2) {
-                            Plane& thisPrime = dynamic_cast<Plane&>(best_prim);  
-                            thisInliers = thisPrime.computeInliersPlane(cloud, thresh, alpha) ;
-                            std::cout << " Inliers computed  " << thisInliers << std::endl ; 
-                        }
-
+                        std::cout << "ah coucou" << std::endl ;
+                        thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;
+                        std::cout << " Inliers computed  " << thisInliers << std::endl ;
 
                         cleanCloud(cloud, cloudManager, thisInliers) ;
 

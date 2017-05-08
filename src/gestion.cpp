@@ -98,9 +98,9 @@ void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
         double thisRadius = computerRadius(thisSampledVertices, thisCenter) ;
 
         // create the object and compute its score 
-        Sphere thisSphere = Sphere(thisRadius, thisCenter) ;
-        thisSphere.computeScore(variance, cloud, threshold, alpha) ;
-        thisSphere.setType(1) ;
+        Primitive* thisSphere = new Sphere(thisRadius, thisCenter) ;
+        thisSphere->computeScore(variance, cloud, threshold, alpha) ;
+        thisSphere->setType(1) ;
 
         // store it in the cloud primitive 
         primitives.addPrimitive(thisSphere) ;
@@ -177,12 +177,12 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             Eigen::Matrix<double, 1,3> planeRefPoint = V.colwise().mean();
             std::cout << "Ref point computed : "<< planeRefPoint << std::endl ;
 
-            Plane newPlane = Plane(planeRefPoint, planeNormal);
+            Primitive* newPlane = new Plane(planeRefPoint, planeNormal);
             std::cout << "Plane created "<< std::endl ;
 
-            newPlane.computeScore(variance, cloud, thresh, alpha);
+            newPlane->computeScore(variance, cloud, thresh, alpha);
             std::cout << "Score computed "<< std::endl ;
-            newPlane.setType(2) ;
+            newPlane->setType(2) ;
 
             // ---- Store it in the cloudPrimitive ----
             primitives.addPrimitive(newPlane);
@@ -237,7 +237,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         const int n = best_primitives.getCloudSize();
 
         // === Consider every pair of primitive for merging ===
-        Primitive first_prim, second_prim;
+        Primitive* first_prim, *second_prim;
 
         for(int i=0; i<n-1; i++){ // First Primitive
             first_prim = best_primitives.getPrimitive(i);
@@ -245,26 +245,19 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                 second_prim = best_primitives.getPrimitive(j);
 
                 // --- Both primitives have the same type ---
-                if(first_prim.getType()==second_prim.getType()){
+                if(first_prim->getType()==second_prim->getType()){
 
                     // ---- They are both Spheres ---
-                    if(first_prim.getType()==1){
-                        // we cast (try) 
-                        Sphere& sphere1 = dynamic_cast<Sphere&>(first_prim);  
-                        Sphere& sphere2 = dynamic_cast<Sphere&>(second_prim);  
-
-                        double d1 = (sphere1.getCenter() - sphere2.getCenter()).norm();
-                        double d2 = std::abs(sphere1.getRadius() - sphere2.getRadius());
+                    if(first_prim->getType()==1){
+                        double d1 = (first_prim->getCenter() - second_prim->getCenter()).norm();
+                        double d2 = std::abs(first_prim->getRadius() - second_prim->getRadius());
                         if(d1 < T_cent && d2 < T_rad){
                             fuses.push_back(std::make_pair(i,j));
                         }
                     }// ---- They are both Planes ---
                     else{
-                        Plane& plane1 = dynamic_cast<Plane&>(first_prim);  
-                        Plane& plane2 = dynamic_cast<Plane&>(second_prim);  
-
-                        double d1 = (plane1.getNormal().dot(plane2.getNormal()));
-                        double d2 = (plane1.getRefPoint() - plane2.getRefPoint()).dot(plane1.getNormal());
+                        double d1 = (first_prim->getNormal().dot(second_prim->getNormal()));
+                        double d2 = (first_prim->getRefPoint() - second_prim->getRefPoint()).dot(first_prim->getNormal());
                         if(d1 < T_norm && d2 < T_refPt){
                             fuses.push_back(std::make_pair(i,j));
                         }
@@ -312,7 +305,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
         // ---- Create new Cloud ---
         DecoratedCloud newCloud = DecoratedCloud(V,N,C) ;
-        return newCloud ;
+        return newCloud;
     }
 
 

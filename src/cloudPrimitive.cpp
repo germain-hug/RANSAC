@@ -5,11 +5,11 @@ namespace acq {
 
 // ******** This class is inspired from "cloudManager" 
 
-void CloudPrimitive::addPrimitive(Primitive const& primitive) {
+void CloudPrimitive::addPrimitive(Primitive* primitive) {
     _primitives.push_back(primitive);
 } 
 
-void CloudPrimitive::setPrimitive(Primitive const& primitive, int index) {
+void CloudPrimitive::setPrimitive(Primitive* primitive, int index) {
     if (index >= _primitives.size()) {
         if (index != _primitives.size())
             std::cerr << "[CloudPrimitive::setPrimitive] "
@@ -23,7 +23,7 @@ void CloudPrimitive::setPrimitive(Primitive const& primitive, int index) {
     _primitives.at(index) = primitive;
 } 
 
-Primitive& CloudPrimitive::getPrimitive(int index) {
+Primitive* CloudPrimitive::getPrimitive(int index) {
     if (index < _primitives.size())
         return _primitives.at(index);
     else {
@@ -43,8 +43,8 @@ int CloudPrimitive::findBestScore() {
     // go over all the primitives to find the best score
     for (int i=0; i<numberPrim ; i++) {
         // get back information for this primitive 
-        Primitive& thisPrim = this->getPrimitive(i) ;
-        thisScore = thisPrim.getScore() ;
+        Primitive* thisPrim = this->getPrimitive(i) ;
+        thisScore = thisPrim->getScore() ;
 
         // compare with previous result 
         if (thisScore > bestScore) {
@@ -58,6 +58,7 @@ int CloudPrimitive::findBestScore() {
 
 // delete the primitive at the position index
 void CloudPrimitive::deletePrimitive(int index) {
+        delete this->getPrimitive(index);
     _primitives.erase(_primitives.begin() + index-1);
 }
 
