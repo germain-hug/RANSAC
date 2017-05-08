@@ -7,7 +7,7 @@ namespace acq {
         std::cout << "Entered in compute score "<< std::endl ;
 
         // --- Compute the Plane Inliers ---
-        Eigen::MatrixXi inliers_idx =  this->computeInliersPlane(cloud,T,alpha) ;
+        Eigen::MatrixXi inliers_idx =  this->computeInliers(cloud,T,alpha) ;
         this->setInliers_idx(inliers_idx) ;
         std::cout << "Inliers set " << std::endl ;
 
@@ -37,10 +37,10 @@ namespace acq {
         // --- Find an orthonormal basis of the plane ---
         Eigen::Matrix<double, Eigen::Dynamic, 3> N(1, 3); N = this->getNormal();
         Eigen::Matrix<double, Eigen::Dynamic, 3> u(1, 3); u << -N(0,1), N(0,0), 0.0;
-        u.normalize();
+        if(u.norm()!=0) u.normalize();
 
         Eigen::MatrixXd v = u.row(0).cross(N.row(0));
-        v.normalize();
+        if(v.norm()!=0) v.normalize();
 
         std::cout << "Basis for the point u : " << u << "and v : " << v << std::endl ;
         
@@ -82,8 +82,8 @@ namespace acq {
     }
 
     /// ------- computeInliers() ------
-    Eigen::MatrixXi Plane::computeInliersPlane(DecoratedCloud& cloud, double T, double alpha) {
-        std::cout << "ah coucou debut func" << std::endl ;
+    Eigen::MatrixXi Plane::computeInliers(DecoratedCloud& cloud, double T, double alpha) {
+        std::cout << "ah coucou debut func plaaaan" << std::endl ;
         
         int numberPoint = cloud.getVertices().rows() ;
         Eigen::Matrix<double, 1, 3> N = this->getNormal();

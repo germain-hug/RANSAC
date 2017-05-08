@@ -15,13 +15,13 @@ namespace acq {
         ~CloudPrimitive() {} ;
 
         /** add a primitive to the vector */
-        void addPrimitive(Primitive const& primitive);
+        void addPrimitive(Primitive* primitive);
 
         /** set the primitive to a fixed place */
-        void setPrimitive(Primitive const& primitive, int index);
+        void setPrimitive(Primitive*, int index);
 
         /** get back the primitive from a vector  */
-        Primitive& getPrimitive(int index);
+        Primitive* getPrimitive(int index);
         int getCloudSize() {return _primitives.size();};
 
         // find the primitive with the best score : return the index
@@ -33,7 +33,7 @@ namespace acq {
         void clearAllPrimitives() ;
 
     protected:
-        std::vector<Primitive> _primitives ; 
+        std::vector<Primitive*> _primitives ;
 
     public:
         // See https://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html

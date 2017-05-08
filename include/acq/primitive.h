@@ -28,16 +28,14 @@ namespace acq {
         void setScore(double score){_score = score;}
         void setInliers_idx(Eigen::MatrixXi inliers_idx){_inliers_idx = inliers_idx;}
 
-        //
+        // Virtual Functions
         virtual double getRadius(){};
         virtual Eigen::Matrix<double, 1,3> getCenter(){};
-        virtual Eigen::RowVector3d getNormal(){};
-        virtual Eigen::RowVector3d getRefPoint(){};
-        virtual Eigen::MatrixXi computeInliersSphere(DecoratedCloud& cloud, double threshold, double alpha) {return 0; };
-        virtual Eigen::MatrixXi computeInliersPlane(DecoratedCloud& cloud, double threshold, double alpha) {return 0; };
-
-        void computeScore(Eigen::Matrix3d variance, DecoratedCloud& pointCloud, double threshold, double alpha); 
-        int findBestNumberPoints(Eigen::Matrix3d variance) ;
+        virtual Eigen::Matrix<double, 1,3> getNormal(){};
+        virtual Eigen::Matrix<double, 1,3> getRefPoint(){};
+        virtual Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha){};
+        virtual void computeScore(Eigen::Matrix3d variance, DecoratedCloud& pointCloud, double threshold, double alpha){};
+        virtual int findBestNumberPoints(Eigen::Matrix3d variance){};
     
     protected:
         double _score; 
@@ -49,18 +47,18 @@ namespace acq {
     class Sphere : public Primitive {
 
     public:
-        // constructor and destructor 
+        // Constructor and Destructor
         Sphere(double radius, Eigen::Matrix<double, 1,3> center) : _radius(radius), _center(center) {} ;
         ~Sphere(){};
 
-        // getters/setters 
-        double getRadius()const{return _radius;}
+        // Getters/Setters
+        double getRadius() const {return _radius;}
         Eigen::Matrix<double, 1,3> getCenter()const{return _center;}
         void setRadius(double radius){_radius = radius;}
         void setCenter(Eigen::Matrix<double, 1,3> center){_center = center;}
 
         void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double threshold, double alpha);
-        Eigen::MatrixXi computeInliersSphere(DecoratedCloud& cloud, double threshold, double alpha);
+        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
         int findBestNumberPoints(Eigen::Matrix3d variance) ;
 
     private:
@@ -82,7 +80,7 @@ namespace acq {
         void setRefPoint(Eigen::Matrix<double, 1,3> refPoint){_refPoint = refPoint;}
 
         void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double T, double alpha);
-        Eigen::MatrixXi computeInliersPlane(DecoratedCloud& cloud, double T, double alpha);
+        Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double T, double alpha);
         int findBestNumberPoints(Eigen::Matrix3d var, DecoratedCloud& cloud,Eigen::MatrixXi inliers_idx);
 
     private:
