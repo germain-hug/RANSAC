@@ -38,34 +38,28 @@ Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
 //  ****** ============ Functions to handle a sphere =============== ******* 
 
 // return true if the 3 points create a valid sphere 
-bool isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold, double alpha) {
+int isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold, double alpha) {
     // estimate the center and the radius using 2 points 
-    std::cout << "Enter is sphere" << std::endl ;
-
     Eigen::Matrix<double, 1,3> thisCenter = computerCenter(vertices.topRows(2), normals.topRows(2)) ;
     double estimatedRadius = computerRadius(vertices.topRows(2), thisCenter) ;
 
-    std::cout << "Estimated radius : " << estimatedRadius << std::endl ;
-
     // compute the estimated normal for the least point  
     Eigen::Matrix<double, 1,3> estimatedNormal = vertices.row(2) - thisCenter ;
-    estimatedNormal = estimatedNormal.normalized() ;
-
-    std::cout << "Estimated normal : " << estimatedNormal << std::endl ;
+    estimatedNormal.normalize() ;
 
     // test for the radius 
     double test1 = computerRadius(vertices.row(2), thisCenter) - estimatedRadius ;
     double test2 = estimatedNormal.dot(normals.row(2).normalized()) ;
 
-    if (std::abs(test1) < threshold )
-        if ( test2 < alpha ) {
+    int thisReturn = 0 ;
+
+    if (std::abs(test1) < threshold ) {
+        if ( test2 > alpha ) {
             // if the 2 test are true, the 3 points form a sphere  
-            return true ; 
+            thisReturn = 1 ; 
         }
-        else 
-            return false ; 
-    else 
-        return false ; 
+    }
+    return thisReturn ;
 }
 
 // if the 3 points create a sphere, we add it to the primitives 
@@ -84,24 +78,25 @@ void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
         thisSampledVertices.row(i) = vertices.row(sample_idx(i,0)) ;
         thisSampledNormals.row(i) = normals.row(sample_idx(i,0)) ;
     }
-    std::cout << "sample vertices : " << thisSampledNormals << std::endl ;
-    std::cout << "sample normal : " << thisSampledNormals << std::endl ;
-
     // test if it's a sphere
-    bool is_sphere = isSphere(thisSampledVertices, thisSampledNormals, threshold, alpha) ;
+    int is_sphere = isSphere(thisSampledVertices, thisSampledNormals, threshold, alpha) ;
 
     std::cout << "Test for this sphere sample : " << is_sphere << std::endl ;
 
-    if (is_sphere) {
+    if (is_sphere==1) {
         // compute the attribut for the object 
         Eigen::Matrix<double, 1,3> thisCenter = computerCenter(thisSampledVertices, thisSampledNormals) ;
         double thisRadius = computerRadius(thisSampledVertices, thisCenter) ;
 
         // create the object and compute its score 
         Primitive* thisSphere = new Sphere(thisRadius, thisCenter) ;
-        thisSphere->computeScore(variance, cloud, threshold, alpha) ;
-        thisSphere->setType(1) ;
 
+        std::cout << "Sphere created" << std::endl ;
+
+        thisSphere->computeScore(variance, cloud, threshold, alpha) ;
+
+        std::cout << "Score computed : " << thisSphere->getScore() << std::endl ;
+        
         // store it in the cloud primitive 
         primitives.addPrimitive(thisSphere) ;
     }
@@ -139,7 +134,7 @@ Eigen::Matrix<double, 1,3> computerCenter(Eigen::MatrixXd vertices, Eigen::Matri
 double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> thisCenter) {
     // compute the distance between each point and the center
     int numberPoint = thisVertices.rows() ;
-    Eigen::Matrix3d centerArray = thisCenter.replicate(numberPoint,1) ;
+    Eigen::MatrixXd centerArray = thisCenter.replicate(numberPoint,1) ;
     Eigen::MatrixXd distances(numberPoint,1) ; 
     distances = (thisVertices-centerArray).rowwise().norm() ;
 

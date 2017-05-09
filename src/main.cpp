@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
     // ********* VARIABLES FOR THE ALGORITHM  ********* 
     int nbIteration = 5 ; 
     int samplePerIt = 5 ;
-    double thresh = 0.002 ;
+    double thresh = 0.9 ;
     double alpha = 0.60 ;
     double thresh_best = 50.0 ;
     // will store the current primitives and the point cloud per primitives

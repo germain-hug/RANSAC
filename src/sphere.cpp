@@ -30,7 +30,7 @@ namespace acq {
         return numberPoints ;
     }
 
-    Eigen::MatrixXi Sphere::computeInliers(DecoratedCloud& cloud, double threshold, double alpha) {
+    Eigen::MatrixXi Sphere::computeInliers(DecoratedCloud& cloud, double threshold, double alpha) {        
         int numberPoint = cloud.getVertices().rows() ;
         Eigen::Matrix<double, 1,3> thisVertice, thisNormal, estimatedNormal ;
         int index_inliers = 0 ;
@@ -53,7 +53,7 @@ namespace acq {
             test2 = estimatedNormal.dot(thisNormal) ;
 
             if (std::abs(test1) < threshold ) {
-                if ( test2 < alpha ) {
+                if ( test2 > alpha ) {
                     // if the 2 test are true, the point is an inlier 
                     inliers_idx(index_inliers,0) = i ;
                     index_inliers += 1 ; 
