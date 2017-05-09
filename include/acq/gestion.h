@@ -32,7 +32,7 @@ namespace acq {
 
     /********* ============= Functions to handle the final cloud =============== *********/
     void fuse(CloudPrimitive& best_primitives, CloudManager& clouds, double T_rad, double T_cent, double T_norm, double T_refPt);
-    DecoratedCloud& gatherClouds(CloudManager& cloudManager) ;
+    DecoratedCloud gatherClouds(CloudManager& cloudManager) ;
     void cleanCloud(DecoratedCloud& cloudRansac, CloudManager& cloudManager, Eigen::Matrix3i inliers_idx) ;
 }
 

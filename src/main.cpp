@@ -274,11 +274,8 @@ int main(int argc, char *argv[]) {
              bool ransacSuccess = ransac(thisCloud, best_primitives, cloudManagerParts, 
                 thresh, alpha, thresh_best, nbIteration, samplePerIt) ;
 
-                if (ransacSuccess) {
+            if (ransacSuccess) {
             // fuse the result in the new cloud 
-
-           std::cout << "Ready to gather clouds" << std::endl ;
-
             acq::DecoratedCloud& newCloud = gatherClouds(cloudManagerParts) ;
 
              viewer.data.clear() ;

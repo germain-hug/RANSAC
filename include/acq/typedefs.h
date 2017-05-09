@@ -28,7 +28,7 @@ typedef Eigen::MatrixXd CloudT;
 typedef Eigen::MatrixXd NormalsT;
 //! Dynamically sized matrix of face vertex indices in rows.
 typedef Eigen::MatrixXi FacesT;
-
+// color en float 
 typedef Eigen::MatrixXd ColorT;
 
 /** \brief An associative storage of neighbour indices for point cloud

@@ -283,18 +283,53 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
     }
 
     // take a cloudManager and gather all the cloud in one 
-    DecoratedCloud& gatherClouds(CloudManager& cloudManager) {
+    DecoratedCloud gatherClouds(CloudManager& cloudManager) {
         // === Build new cloud with color attributes ===
-        Eigen::MatrixXd V, C, N;
+        int numberOfCloud = cloudManager.getCloudSize() ;
+        int numberOfVertices =0 ;
 
-        for(int i=0; i< cloudManager.getCloudSize(); i++){
-            V << V, cloudManager.getCloud(i).getVertices();
-            N << N, cloudManager.getCloud(i).getNormals();
-            C << C, Eigen::RowVector3d(std::rand()/double(RAND_MAX),
+        std::cout << "enter in gathercloud " << numberOfCloud << " to merge " << std::endl ;
+
+        // determine the size of the new cloud 
+        for(int i=0; i< numberOfCloud; i++){
+            numberOfVertices += cloudManager.getCloud(i).getVertices().rows() ;
+        }
+
+        // create the matrix to store the result
+        Eigen::MatrixXd V(numberOfVertices,3) ;
+        Eigen::MatrixXd C(numberOfVertices,3) ;
+        Eigen::MatrixXd N(numberOfVertices,3);
+
+        std::cout << "test normals : " << cloudManager.getCloud(0).getNormals() << std::endl ;
+
+        int indiceStart = 0 ;
+        int nbVertCloud ;
+
+        for(int i=0; i< numberOfCloud; i++){
+            // number of vertex for this cloud 
+            nbVertCloud = cloudManager.getCloud(i).getVertices().rows() ;
+
+            // fill each block 
+            V.block(indiceStart,0,nbVertCloud,3) = cloudManager.getCloud(i).getVertices();
+
+        std::cout << "Vertex OK" << std::endl ;
+
+            N.block(indiceStart,0,nbVertCloud,3) = cloudManager.getCloud(i).getNormals();
+
+        std::cout << "Normals OK" << std::endl ;
+
+            C.block(indiceStart,0,nbVertCloud,3) = Eigen::RowVector3d(std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX)).replicate(
-                    cloudManager.getCloud(i).getFaces().rows(), 1);
+                    cloudManager.getCloud(i).getVertices().rows(), 1);
+
+        std::cout << "colors OK" << std::endl ;
+
+            // update the indice to start filling 
+            indiceStart += nbVertCloud  ;
         }
+
+        std::cout << "Vertex test : " << V << std::endl ;
 
         // ---- Create new Cloud ---
         DecoratedCloud newCloud = DecoratedCloud(V,N,C) ;
@@ -327,15 +362,11 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                     V_out << V_out, cloudRansac.getVertices().row(i);
                     outliers_valid++;
                 }
-
              }
-            std::cout << "Store New Clouds" << std::endl;
             cloudManager.addCloud(DecoratedCloud(V_out.topRows(inliers_valid-1))); // Store cloud of inliers
             cloudRansac.setVertices(V_in.topRows(outliers_valid-1)); // Keep cloud deprived from inliers
         }
-
         std::cout << "Exit Clean Cloud" << std::endl;
-
     }
 
 
