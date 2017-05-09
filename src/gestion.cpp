@@ -306,30 +306,41 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
 
     void cleanCloud(DecoratedCloud& cloudRansac, CloudManager& cloudManager, Eigen::Matrix3i inliers_idx){
+        std::cout << "Enter Clean Cloud" << std::endl;
         // ---- We remove inliers from cloudRansac -----
         const int n_inliers = inliers_idx.rows();
-        const int n_cloud = cloudRansac.getVertices().rows();
-        Eigen::MatrixXd V_in, V_out;
+        if(n_inliers > 0) {
+            const int n_cloud = cloudRansac.getVertices().rows();
+            Eigen::MatrixXd V_in(n_cloud, 3), V_out(n_cloud, 3);
+            int inliers_valid = 0, outliers_valid = 0;
 
-        // ---- For every vertex, search if is an inlier ---
-        for(int i=0; i<n_cloud; i++){
-            bool isValid = true;
-            for(int j=0; j<n_inliers; j++){
-                if(inliers_idx(j,0)==i){isValid = false; break;}
-            }
+            // ---- For every vertex, search if is an inlier ---
+            for(int i=0; i<n_cloud; i++){
+                bool isValid = true;
+                for(int j=0; j<n_inliers; j++){
+                    if(inliers_idx(j,0)==i){isValid = false; break;}
+                }
 
-            // Vertex is valid, save it to the current cloud
-            if(isValid){
-                V_in << V_in, cloudRansac.getVertices().row(i);
-            } else{
-                // Vertex is non valid, add it to cloud of inliers
-                V_out << V_out, cloudRansac.getVertices().row(i);
-            }
+                // Vertex is valid, save it to the current cloud
+                if(isValid){
+                    V_in << V_in, cloudRansac.getVertices().row(i);
+                    inliers_valid++;
+                } else{
+                    // Vertex is non valid, add it to cloud of inliers
+                    V_out << V_out, cloudRansac.getVertices().row(i);
+                    outliers_valid++;
+                }
 
+             }
+            std::cout << "Store New Clouds" << std::endl;
+            cloudManager.addCloud(DecoratedCloud(V_out.topRows(inliers_valid-1))); // Store cloud of inliers
+            cloudRansac.setVertices(V_in.topRows(outliers_valid-1)); // Keep cloud deprived from inliers
         }
-        cloudManager.addCloud(DecoratedCloud(V_out)); // Store cloud of inliers
-        cloudRansac.setVertices(V_in); // Keep cloud deprived from inliers
+
+        std::cout << "Exit Clean Cloud" << std::endl;
+
     }
+
 
 
 }
