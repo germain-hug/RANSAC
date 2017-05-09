@@ -12,7 +12,8 @@ namespace acq {
             bool prim_detected = false, test_thisSphere, test_thisPlane, test ;
             int bestPrim_idx, nbAllPrim ;
             double best_score ;
-
+            int newSize ;
+            bool primitiveFound = false ;
             // compute the variance 
             Eigen::Matrix3d variance = computeVariance(cloud.getVertices()) ;
 
@@ -27,12 +28,13 @@ namespace acq {
                     thisSample = sample(numberOfPoint) ;
 
                     // test for the primitive, if they exist : add them in the cloud primitive 
-                    // computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
+                    computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
                     computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
                 }
 
                 nbAllPrim = allPrimitive.getCloudSize() ;
-                        std::cout << "nb prim : "<< nbAllPrim << std::endl ; 
+                
+                std::cout << "nb prim : "<< nbAllPrim << std::endl ; 
 
                 // if a primitive has been created in the turn 
                 if (nbAllPrim>0) {
@@ -45,29 +47,26 @@ namespace acq {
 
                     // store the results both in primitives and clou
                     if (best_score > thresh_best) {
-                        std::cout << " Enter if  " << std::endl ; 
-
                         best_primitives.addPrimitive(best_prim) ;
 
-                        std::cout << "cloud size : " <<best_primitives.getCloudSize() << std::endl ; 
-                        int thisType = best_prim->getType() ;
-
-                        std::cout << " type " << thisType << std::endl ;
-
-                        std::cout << "ah coucou" << std::endl ;
                         thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;
-                        std::cout << " Inliers computed  " << thisInliers << std::endl ;
+                        std::cout << " Inliers computed  " << std::endl ;
 
                         cleanCloud(cloud, cloudManager, thisInliers) ;
 
-                        std::cout << "Cloud clean  " << std::endl ; 
-                        //throw std::exception() ;
+                        newSize = cloud.getVertices().rows() ;
+
+                        primitiveFound = true ;
+                    }
+
+                    if (newSize < 3) {
+                        break ;
                     }
                 }
             }
 
             std::cout << "sortie de RANSAC" << std::endl ;
-
+            return primitiveFound ;
             // cloudManager and cloudPrimitive contains the result of the function 
     };
 

@@ -81,8 +81,6 @@ void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
     // test if it's a sphere
     int is_sphere = isSphere(thisSampledVertices, thisSampledNormals, threshold, alpha) ;
 
-    std::cout << "Test for this sphere sample : " << is_sphere << std::endl ;
-
     if (is_sphere==1) {
         // compute the attribut for the object 
         Eigen::Matrix<double, 1,3> thisCenter = computerCenter(thisSampledVertices, thisSampledNormals) ;
@@ -90,12 +88,10 @@ void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
 
         // create the object and compute its score 
         Primitive* thisSphere = new Sphere(thisRadius, thisCenter) ;
-
-        std::cout << "Sphere created" << std::endl ;
-
         thisSphere->computeScore(variance, cloud, threshold, alpha) ;
 
-        std::cout << "Score computed : " << thisSphere->getScore() << std::endl ;
+        // set the type 
+        thisSphere->setType(1) ;
         
         // store it in the cloud primitive 
         primitives.addPrimitive(thisSphere) ;
@@ -178,6 +174,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
             newPlane->computeScore(variance, cloud, thresh, alpha);
             std::cout << "Score computed "<< std::endl ;
+
             newPlane->setType(2) ;
 
             // ---- Store it in the cloudPrimitive ----

@@ -276,6 +276,9 @@ int main(int argc, char *argv[]) {
 
                 if (ransacSuccess) {
             // fuse the result in the new cloud 
+
+           std::cout << "Ready to gather clouds" << std::endl ;
+
             acq::DecoratedCloud& newCloud = gatherClouds(cloudManagerParts) ;
 
              viewer.data.clear() ;
