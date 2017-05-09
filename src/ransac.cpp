@@ -15,11 +15,6 @@ namespace acq {
 
             // compute the variance 
             Eigen::Matrix3d variance = computeVariance(cloud.getVertices()) ;
-            /*std::cout << "thresh : "<< thresh  << std::endl ; 
-            std::cout << "alpha : "<< alpha  << std::endl ; 
-            std::cout << "thresh_best : "<< thresh_best  << std::endl ; 
-            std::cout << "iterationsTotal : "<< iterationsTotal  << std::endl ; 
-            std::cout << "numberSample : "<< numberSample  << std::endl ; */
 
             // will contain all the primitives created 
             CloudPrimitive allPrimitive ;

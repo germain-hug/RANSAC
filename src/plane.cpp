@@ -82,13 +82,9 @@ namespace acq {
     }
 
     /// ------- computeInliers() ------
-<<<<<<< HEAD
-    Eigen::MatrixXi Plane::computeInliersPlane(DecoratedCloud& cloud, double threshold, double alpha) {        
-=======
     Eigen::MatrixXi Plane::computeInliers(DecoratedCloud& cloud, double T, double alpha) {
         std::cout << "ah coucou debut func plaaaan" << std::endl ;
         
->>>>>>> 624ebb7c186904f42bfc3f821f32ca9cbdab1d88
         int numberPoint = cloud.getVertices().rows() ;
         Eigen::Matrix<double, 1, 3> N = this->getNormal();
         Eigen::Matrix<double, 1, 3> P = this->getRefPoint();
@@ -108,7 +104,7 @@ namespace acq {
 
             // --- Check if in range and if normals match ---
             double dist = (_V.dot(N) + d) / N.norm();
-            if(dist < threshold && _N.dot(N) < alpha){
+            if(dist < T && _N.dot(N) < alpha){
                 inliers_idx(idx_counter,0) = i;
                 idx_counter++;
             }

@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     //************************************
     
     // Load a mesh in OFF format
-    std::string meshPath = "../models/sphere_cube.obj";
+    std::string meshPath = "../models/sphere.off";
     if (argc > 1) {
         meshPath = std::string(argv[1]);
         if (meshPath.find(".obj") == std::string::npos) {
@@ -114,9 +114,9 @@ int main(int argc, char *argv[]) {
     {
         Eigen::MatrixXd V, TC, N;
         Eigen::MatrixXi F, FTC, FN;
-        igl::readOBJ(meshPath, V, TC, N, F, FTC, FN);
+        igl::readOFF(meshPath, V, F);
 
-        if(FTC.size() == 0) FTC = F;
+        //if(FTC.size() == 0) FTC = F;
 
         if (V.rows() <= 0) {
             std::cerr << "Could not read mesh at " << meshPath
@@ -126,9 +126,9 @@ int main(int argc, char *argv[]) {
 
 
         // Store read vertices and faces
-        N.rowwise().normalize();
+        //N.rowwise().normalize();
 
-        acq::DecoratedCloud cloud = acq::DecoratedCloud(V, F, N) ;
+        acq::DecoratedCloud cloud = acq::DecoratedCloud(V, F) ;
 
         cloud.setNormals(
                 acq::recalcNormals(
