@@ -128,59 +128,24 @@ int main(int argc, char *argv[]) {
         // Store read vertices and faces
         //N.rowwise().normalize();
 
-        acq::DecoratedCloud cloud = acq::DecoratedCloud(V, F) ;
+        cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V, F));
 
-        cloud.setNormals(
-                acq::recalcNormals(
-                        /* [in]      K-neighbours for FLANN: */ kNeighbours,
-                        /* [in]             Vertices matrix: */ cloud.getVertices(),
-                        /* [in]      max neighbour distance: */ maxNeighbourDist
-                )
-        );
-
-        // Estimate neighbours using FLANN
-        acq::NeighboursT const neighbours =
-                acq::calculateCloudNeighboursFromFaces(
-                        /* [in] Faces: */ cloud.getFaces()
-                );
-
-        // Estimate normals for points in cloud vertices
-        cloud.setNormals(
-                acq::calculateCloudNormals(
-                        /* [in]               Cloud: */ cloud.getVertices(),
-                        /* [in] Lists of neighbours: */ neighbours
-                )
-        );
-
-        int nFlips =
-                acq::orientCloudNormalsFromFaces(
-                        /* [in    ] Lists of neighbours: */ cloud.getFaces(),
-                        /* [in,out]   Normals to change: */ cloud.getNormals()
-                );
-        std::cout << "nFlips: " << nFlips << "/" << cloud.getNormals().size() << "\n";
+        // Set Normals from OBJ file
+        //cloudManagerOldMesh.getCloud(typeMesh).setNormals(N);
+        //std::cout << N.size() << std::endl;
 
         // Update viewer
-        acq::setViewerNormals(
-                /* [in, out] Viewer to update: */ viewer,
-                /* [in]            Pointcloud: */ cloud.getVertices(),
-                /* [in] Normals of Pointcloud: */ cloud.getNormals()
-        );
-
-        cloudManagerOldMesh.addCloud(cloud);
-
+        //acq::setViewerNormals(viewer, cloudManagerOldMesh.getCloud(typeMesh).getVertices(), N);
+    
+        // set the mesh 
+        viewer.data.clear() ;
 
         // Show mesh
         viewer.data.set_mesh(
             cloudManagerOldMesh.getCloud(typeMesh).getVertices(),
             cloudManagerOldMesh.getCloud(typeMesh).getFaces()
         );
-
-        // Set Normals from OBJ file
-        cloudManagerOldMesh.getCloud(typeMesh).setNormals(N);
-        std::cout << N.size() << std::endl;
-
-        // Update viewer
-        acq::setViewerNormals(viewer, cloudManagerOldMesh.getCloud(typeMesh).getVertices(), N);
+    
     }
 
     // Extend viewer menu using a lambda function
@@ -217,6 +182,55 @@ int main(int argc, char *argv[]) {
             // clear the cloudManager 
             cloudManagerParts.clearCloud() ;
         });        
+
+       viewer.ngui->addButton("Compute Normals",
+                               [&]() {
+
+        cloudManagerOldMesh.getCloud(typeMesh).setNormals(
+                acq::recalcNormals(
+                        /* [in]      K-neighbours for FLANN: */ kNeighbours,
+                        /* [in]             Vertices matrix: */ cloudManagerOldMesh.getCloud(typeMesh).getVertices(),
+                        /* [in]      max neighbour distance: */ maxNeighbourDist
+                )
+        );
+
+        // Estimate neighbours using FLANN
+        acq::NeighboursT const neighbours =
+                acq::calculateCloudNeighboursFromFaces(
+                        /* [in] Faces: */ cloudManagerOldMesh.getCloud(typeMesh).getFaces()
+                );
+
+        // Estimate normals for points in cloud vertices
+        cloudManagerOldMesh.getCloud(typeMesh).setNormals(
+                acq::calculateCloudNormals(
+                        /* [in]               Cloud: */ cloudManagerOldMesh.getCloud(typeMesh).getVertices(),
+                        /* [in] Lists of neighbours: */ neighbours
+                )
+        );
+
+        int nFlips =
+                acq::orientCloudNormalsFromFaces(
+                        /* [in    ] Lists of neighbours: */ cloudManagerOldMesh.getCloud(typeMesh).getFaces(),
+                        /* [in,out]   Normals to change: */ cloudManagerOldMesh.getCloud(typeMesh).getNormals()
+                );
+
+        viewer.data.clear() ;
+
+        // Show mesh
+        viewer.data.set_mesh(
+            cloudManagerOldMesh.getCloud(typeMesh).getVertices(),
+            cloudManagerOldMesh.getCloud(typeMesh).getFaces()
+        );
+
+        // Update viewer
+        acq::setViewerNormals(
+                /* [in, out] Viewer to update: */ viewer,
+                /* [in]            Pointcloud: */ cloudManagerOldMesh.getCloud(typeMesh).getVertices(),
+                /* [in] Normals of Pointcloud: */ cloudManagerOldMesh.getCloud(typeMesh).getNormals()
+        );
+
+        });
+
 
         viewer.ngui->addGroup("Choose the parameters");
 

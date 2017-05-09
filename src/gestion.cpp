@@ -154,7 +154,8 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                       DecoratedCloud &cloud,
                       CloudPrimitive &primitives,
                       double thresh, double alpha) {        
-        Eigen::MatrixXd V = cloud.getVertices(), N = cloud.getNormals();
+        Eigen::MatrixXd V = cloud.getVertices(),
+        N = cloud.getNormals();
         const int cloudSize = V.rows();
         const int nSamples = sample_idx.rows();
 
