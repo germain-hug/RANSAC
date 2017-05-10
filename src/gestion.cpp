@@ -369,7 +369,8 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                     outliers_valid++;
                 }
              }
-            cloudManager.addCloud(DecoratedCloud(V_out.topRows(inliers_valid-1),N_out.topRows(inliers_valid-1))); // Store cloud of inliers
+            Eigen::MatrixXd N_out_top = N_out.topRows(inliers_valid-1);
+            cloudManager.addCloud(DecoratedCloud(V_out.topRows(inliers_valid-1),N_out_top)); // Store cloud of inliers
             cloudRansac.setVertices(V_in.topRows(outliers_valid-1)); // Keep cloud deprived from inliers
             cloudRansac.setNormals(V_in.topRows(outliers_valid-1));
 
