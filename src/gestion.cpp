@@ -344,6 +344,8 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         if(n_inliers > 0) {
             const int n_cloud = cloudRansac.getVertices().rows();
             Eigen::MatrixXd V_in(n_cloud, 3), V_out(n_cloud, 3);
+            Eigen::MatrixXd N_in(n_cloud, 3), N_out(n_cloud, 3);
+
             int inliers_valid = 0, outliers_valid = 0;
 
             // ---- For every vertex, search if is an inlier ---
@@ -356,15 +358,19 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                 // Vertex is valid, save it to the current cloud
                 if(isValid){
                     V_in << V_in, cloudRansac.getVertices().row(i);
+                    N_in << N_in, cloudRansac.getNormals().row(i);
                     inliers_valid++;
                 } else{
                     // Vertex is non valid, add it to cloud of inliers
                     V_out << V_out, cloudRansac.getVertices().row(i);
+                    N_out << N_out, cloudRansac.getNormals().row(i);
                     outliers_valid++;
                 }
              }
-            cloudManager.addCloud(DecoratedCloud(V_out.topRows(inliers_valid-1))); // Store cloud of inliers
+            cloudManager.addCloud(DecoratedCloud(V_out.topRows(inliers_valid-1),N_in.topRows(inliers_valid-1))); // Store cloud of inliers
             cloudRansac.setVertices(V_in.topRows(outliers_valid-1)); // Keep cloud deprived from inliers
+            cloudRansac.setNormals(V_in.topRows(outliers_valid-1));
+
         }
         std::cout << "Exit Clean Cloud" << std::endl;
     }
