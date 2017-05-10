@@ -283,7 +283,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
     }
 
     // take a cloudManager and gather all the cloud in one 
-    DecoratedCloud gatherClouds(CloudManager& cloudManager) {
+    DecoratedCloud* gatherClouds(CloudManager& cloudManager) {
         // === Build new cloud with color attributes ===
         int numberOfCloud = cloudManager.getCloudSize() ;
         int numberOfVertices =0 ;
@@ -332,7 +332,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         std::cout << "Vertex test : " << V << std::endl ;
 
         // ---- Create new Cloud ---
-        DecoratedCloud newCloud = DecoratedCloud(V,N,C) ;
+        DecoratedCloud* newCloud = new DecoratedCloud(V,N,C) ;
         return newCloud;
     }
 
@@ -368,9 +368,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         }
         std::cout << "Exit Clean Cloud" << std::endl;
     }
-
-
-
 }
 
 
