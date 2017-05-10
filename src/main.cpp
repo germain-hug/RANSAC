@@ -170,17 +170,18 @@ int main(int argc, char *argv[]) {
         viewer.ngui->addButton("Show the original mesh",
                                [&]() {
             viewer.data.clear() ;
-
             // Show mesh
             viewer.data.set_mesh(
                              cloudManagerOldMesh.getCloud(typeMesh).getVertices(),
                              cloudManagerOldMesh.getCloud(typeMesh).getFaces()
-                             ); 
+            ); 
 
             // clean all the primitives   
             best_primitives.clearAllPrimitives() ;
+            std::cout << "bestPrimcleaned" << std::endl ;
             // clear the cloudManager 
             cloudManagerParts.clearCloud() ;
+            std::cout << "cloudManager" << std::endl ;
         });        
 
        viewer.ngui->addButton("Compute Normals",
@@ -276,17 +277,17 @@ int main(int argc, char *argv[]) {
 
             if (ransacSuccess) {
             // fuse the result in the new cloud 
-            acq::DecoratedCloud& newCloud = gatherClouds(cloudManagerParts) ;
+            acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts) ;
 
-             viewer.data.clear() ;
+            viewer.data.clear() ;
 
             // Show mesh
             viewer.data.set_mesh(
-                             newCloud.getVertices(),
-                             newCloud.getFaces()
+                             newCloud->getVertices(),
+                             thisCloud.getFaces() // CHANGE THIS
             );
 
-             viewer.data.set_colors(newCloud.getColors());
+             viewer.data.set_colors(newCloud->getColors());
                 }
                 else {
                     std::cout << "RANSAC didn't find any primitive" << std::endl ;
@@ -305,18 +306,17 @@ int main(int argc, char *argv[]) {
             fuse(best_primitives, cloudManagerParts, T_rad, T_cent, T_norm, T_refPt) ;
 
            // fuse the result in the new cloud 
-            acq::DecoratedCloud& newCloud = gatherClouds(cloudManagerParts) ;
-
+            acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts) ;
             // visualisation 
             viewer.data.clear() ;
 
             // Show mesh
             viewer.data.set_mesh(
-                             newCloud.getVertices(),
-                             newCloud.getFaces()
+                             newCloud->getVertices(),
+                             newCloud->getFaces()
             );
 
-             viewer.data.set_colors(newCloud.getColors());
+             viewer.data.set_colors(newCloud->getColors());
 
         });         
 

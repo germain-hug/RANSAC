@@ -64,8 +64,6 @@ int isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold
 
 // if the 3 points create a sphere, we add it to the primitives 
 void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, CloudPrimitive& primitives, double threshold, double alpha) {
-    std::cout << "Enter compute Sphere " << std::endl ;
-
     Eigen::MatrixXd vertices = cloud.getVertices() ;
     Eigen::MatrixXd normals = cloud.getNormals() ;
     int cloudSize = vertices.rows() ;
@@ -158,23 +156,13 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             thisNormal.row(i) = N.row(sample_idx(i, 0));
         }
 
-        std::cout << "thisVertex(): " << thisVertex << std::endl;
-
         if (isPlane(thisVertex, thisNormal, thresh, alpha)) {
-            std::cout << "Plane detected" << std::endl ;
-
             // ---- Create a new plane and compute its score ----
             Eigen::Matrix<double, 1,3> planeNormal = computeNormal(thisVertex, thisNormal.row(0));
-
             Eigen::Matrix<double, 1,3> planeRefPoint = V.colwise().mean();
-            std::cout << "Ref point computed : "<< planeRefPoint << std::endl ;
 
             Primitive* newPlane = new Plane(planeRefPoint, planeNormal);
-            std::cout << "Plane created "<< std::endl ;
-
             newPlane->computeScore(variance, cloud, thresh, alpha);
-            std::cout << "Score computed "<< std::endl ;
-
             newPlane->setType(2) ;
 
             // ---- Store it in the cloudPrimitive ----
@@ -200,8 +188,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         for (int i = 0; i < V.rows() - 2; i++) {
             P01 = V.row(1 + i) - V.row(i);
             P02 = V.row(2 + i) - V.row(i);
-            std::cout << "P01: " << P01 << " | P02: " << P02 <<  std::endl;
-            std::cout << " V: " << V << std::endl;
             N += P02.cross(P01) / (V.rows() - 2);
         }
 
@@ -209,8 +195,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         if (_N.dot(N) < 0) N = -N;
         // Normalize
         if(N(0,0)!=0 && N(0,1)!=0 && N(0,2)!=0) N = N.normalized();
-
-        std::cout << "Normal Computed : " << N << std::endl ;
         return N;
     }
 
@@ -288,8 +272,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         int numberOfCloud = cloudManager.getCloudSize() ;
         int numberOfVertices =0 ;
 
-        std::cout << "enter in gathercloud " << numberOfCloud << " to merge " << std::endl ;
-
         // determine the size of the new cloud 
         for(int i=0; i< numberOfCloud; i++){
             numberOfVertices += cloudManager.getCloud(i).getVertices().rows() ;
@@ -299,8 +281,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         Eigen::MatrixXd V(numberOfVertices,3) ;
         Eigen::MatrixXd C(numberOfVertices,3) ;
         Eigen::MatrixXd N(numberOfVertices,3);
-
-        std::cout << "test normals : " << cloudManager.getCloud(0).getNormals() << std::endl ;
 
         int indiceStart = 0 ;
         int nbVertCloud ;
@@ -312,37 +292,30 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             // fill each block 
             V.block(indiceStart,0,nbVertCloud,3) = cloudManager.getCloud(i).getVertices();
 
-        std::cout << "Vertex OK" << std::endl ;
-
             N.block(indiceStart,0,nbVertCloud,3) = cloudManager.getCloud(i).getNormals();
-
-        std::cout << "Normals OK" << std::endl ;
 
             C.block(indiceStart,0,nbVertCloud,3) = Eigen::RowVector3d(std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX)).replicate(
                     cloudManager.getCloud(i).getVertices().rows(), 1);
 
-        std::cout << "colors OK" << std::endl ;
-
             // update the indice to start filling 
             indiceStart += nbVertCloud  ;
         }
 
-        std::cout << "Vertex test : " << V << std::endl ;
-
         // ---- Create new Cloud ---
         DecoratedCloud* newCloud = new DecoratedCloud(V,N,C) ;
-        return newCloud;
+        return newCloud ;
     }
 
 
-    void cleanCloud(DecoratedCloud& cloudRansac, CloudManager& cloudManager, Eigen::Matrix3i inliers_idx){
+    void cleanCloud(DecoratedCloud& cloudRansac, CloudManager& cloudManager, Eigen::MatrixXi inliers_idx){
         std::cout << "Enter Clean Cloud" << std::endl;
         // ---- We remove inliers from cloudRansac -----
-        const int n_inliers = inliers_idx.rows();
+        int n_inliers = inliers_idx.rows();
+
         if(n_inliers > 0) {
-            const int n_cloud = cloudRansac.getVertices().rows();
+            int n_cloud = cloudRansac.getVertices().rows();
             Eigen::MatrixXd V_in(n_cloud, 3);
             Eigen::MatrixXd V_out(n_cloud, 3) ;
             Eigen::MatrixXd N_in(n_cloud, 3) ;
@@ -354,26 +327,27 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             for(int i=0; i<n_cloud; i++){
                 bool isValid = true;
                 for(int j=0; j<n_inliers; j++){
-                    if(inliers_idx(j,0)==i){isValid = false; break;}
+                    if(inliers_idx(j,0)==i){isValid = false;}
                 }
 
                 // Vertex is valid, save it to the current cloud
                 if(isValid){
-                    V_in << V_in, cloudRansac.getVertices().row(i);
-                    N_in << N_in, cloudRansac.getNormals().row(i);
+                    V_in.row(inliers_valid) =  cloudRansac.getVertices().row(i);
+                    N_in.row(inliers_valid) =  cloudRansac.getNormals().row(i);
                     inliers_valid++;
                 } else{
                     // Vertex is non valid, add it to cloud of inliers
-                    V_out << V_out, cloudRansac.getVertices().row(i);
-                    N_out << N_out, cloudRansac.getNormals().row(i);
+                    V_out.row(outliers_valid) = cloudRansac.getVertices().row(i);
+                    N_out.row(outliers_valid) = cloudRansac.getNormals().row(i);
                     outliers_valid++;
                 }
              }
-            Eigen::MatrixXd N_out_top = N_out.topRows(inliers_valid-1);
-            cloudManager.addCloud(DecoratedCloud(V_out.topRows(inliers_valid-1),N_out_top)); // Store cloud of inliers
-            cloudRansac.setVertices(V_in.topRows(outliers_valid-1)); // Keep cloud deprived from inliers
-            cloudRansac.setNormals(V_in.topRows(outliers_valid-1));
-
+               //          Eigen::MatrixXd N_out_top = N_out.block(0,0,inliers_valid-1,3);
+            Eigen::MatrixXd N_out_top = N_out.topRows(outliers_valid-1);
+            
+            cloudManager.addCloud(DecoratedCloud(V_out.topRows(outliers_valid-1),N_out_top)); // Store cloud of inliers
+            cloudRansac.setVertices(V_in.topRows(inliers_valid-1)); // Keep cloud deprived from inliers
+            cloudRansac.setNormals(N_in.topRows(inliers_valid-1));
         }
         std::cout << "Exit Clean Cloud" << std::endl;
     }

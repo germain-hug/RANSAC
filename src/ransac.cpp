@@ -50,7 +50,6 @@ namespace acq {
                         best_primitives.addPrimitive(best_prim) ;
 
                         thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;
-                        std::cout << " Inliers computed  " << std::endl ;
 
                         cleanCloud(cloud, cloudManager, thisInliers) ;
 
