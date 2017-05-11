@@ -276,22 +276,18 @@ int main(int argc, char *argv[]) {
                 thresh, alpha, thresh_best, nbIteration, samplePerIt) ;
 
             if (ransacSuccess) {
-            // fuse the result in the new cloud 
-            acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts) ;
+                // fuse the result in the new cloud 
+                acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts) ;
 
-            viewer.data.clear() ;
+                viewer.data.clear() ;
 
-            // Show mesh
-            viewer.data.set_mesh(
-                             newCloud->getVertices(),
-                             thisCloud.getFaces() // CHANGE THIS
-            );
+                // Show mesh
+                viewer.data.set_points(newCloud->getVertices(), newCloud->getColors()) ;
+            }
 
-             viewer.data.set_colors(newCloud->getColors());
-                }
-                else {
-                    std::cout << "RANSAC didn't find any primitive" << std::endl ;
-                }
+            else {
+                std::cout << "RANSAC didn't find any primitive" << std::endl ;
+            }
         });
 
           viewer.ngui->addButton("Primitive fusion",

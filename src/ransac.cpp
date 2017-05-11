@@ -34,8 +34,6 @@ namespace acq {
 
                 nbAllPrim = allPrimitive.getCloudSize() ;
                 
-                std::cout << "nb prim : "<< nbAllPrim << std::endl ; 
-
                 // if a primitive has been created in the turn 
                 if (nbAllPrim>0) {
                     // get back the best primitive 
