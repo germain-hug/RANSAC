@@ -124,6 +124,10 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
 
+        // ----- Normalize Vertices -----
+        Eigen::MatrixXd max_row = V.rowwise().maxCoeff();
+        Eigen::MatrixXd max_col = V.colwise().maxCoeff();
+        V /= std::max(max_row.maxCoeff(), max_col.maxCoeff());
 
         // Store read vertices and faces
         //N.rowwise().normalize();

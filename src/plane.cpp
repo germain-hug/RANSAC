@@ -13,6 +13,7 @@ namespace acq {
 
 
         // --- Estimate the density of our plane ---
+        std::cout << "inliers rows = " << inliers_idx.rows() << std::endl;
         int optimalInliers = this->findBestNumberPoints(var, cloud, inliers_idx) ;
 
         std::cout << "optimalInliers : " << optimalInliers << " | inliers_idx.rows(): "<< inliers_idx.rows() << std::endl ;
@@ -35,12 +36,23 @@ namespace acq {
         std::cout << "Entered in find best number points "<< std::endl ;
 
         // --- Find an orthonormal basis of the plane ---
-        Eigen::Matrix<double, Eigen::Dynamic, 3> N(1, 3); N = this->getNormal();
-        Eigen::Matrix<double, Eigen::Dynamic, 3> u(1, 3); u << -N(0,1), N(0,0), 0.0;
-        if(u.norm()!=0) u.normalize();
+        Eigen::Matrix<double, Eigen::Dynamic, 3> N(1, 3); N = this->getNormal().normalized();
+        Eigen::Matrix<double, Eigen::Dynamic, 3> u(1, 3);
 
+        // Compute u so that it's orthogonal to N
+        if(N(0,1)!=0 || N(0,0)!=0)
+            u << -N(0,1), N(0,0), 0.0;
+        else if(N(0,2)!=0 || N(0,0)!=0)
+            u << -N(0,2), 0.0, N(0,0);
+        else u << 0.0, -N(0,2), N(0,1);
+        if(u.norm()!=0.0) u.normalize();
+
+        // Compute v to make a basis (u,v,N)
         Eigen::MatrixXd v = u.row(0).cross(N.row(0));
-        if(v.norm()!=0) v.normalize();
+        if(v.norm()!=0.0) v.normalize();
+
+        std::cout << " u " << u << " N " << N << std::endl;
+
 
         std::cout << "Basis for the point u : " << u << "and v : " << v << std::endl ;
         
@@ -48,11 +60,11 @@ namespace acq {
         const int n = inliers_idx.rows();
         Eigen::MatrixXd inliers2D(n, 2);
         Eigen::MatrixXd this_vertex ;
-        int idx ;
-
+        int idx;
+        //std::cout << cloud.getVertices() << std::endl;
         for(int i = 0; i<n; i++){
             idx = inliers_idx(i,0);
-            this_vertex = cloud.getVertices().row(idx);
+            this_vertex = cloud.getVertices().row(idx); /// ---- NaN !!!!!
             inliers2D(i,0) = u.row(0).dot(this_vertex.row(0));
             inliers2D(i,1) = v.row(0).dot(this_vertex.row(0));
         }
@@ -71,7 +83,8 @@ namespace acq {
         // --- Estimate Optimal Number of Points ---
         double var_x = u.row(0).dot(var.diagonal());
         double var_y = v.row(0).dot(var.diagonal());
-        double meanVariance = sqrt(pow(var_x,2.0)+pow(var_y,2.0));
+        //double meanVariance = sqrt(pow(var_x,2.0)+pow(var_y,2.0));
+        double meanVariance = std::abs((var_x + var_y)/2.0);
 
         std::cout << "mean var" << meanVariance << std::endl;
         int numberPoints = floor(thisArea/(meanVariance));
@@ -84,33 +97,39 @@ namespace acq {
     /// ------- computeInliers() ------
     Eigen::MatrixXi Plane::computeInliers(DecoratedCloud& cloud, double T, double alpha) {
         std::cout << "ah coucou debut func plaaaan" << std::endl ;
-        
-        int numberPoint = cloud.getVertices().rows() ;
-        Eigen::Matrix<double, 1, 3> N = this->getNormal();
-        Eigen::Matrix<double, 1, 3> P = this->getRefPoint();
 
-        double d = N.dot(P);
-        const long n = cloud.getVertices().rows() ;
-
+        int numberPoint = cloud.getVertices().rows();
         Eigen::MatrixXi inliers_idx(numberPoint, 1);
 
-        Eigen::Matrix<double, 1,3> _V, _N;
+        Eigen::Matrix<double, 1, 3> N = this->getNormal().normalized();
+        Eigen::Matrix<double, 1, 3> P = this->getRefPoint();
 
-        int idx_counter = 0;
+        std::cout << "N : " << N << std::endl;
 
-        for(int i=0; i<n; i++){
-            _V = cloud.getVertices().row(i);
-            _N = cloud.getVertices().row(i);
+        if( N.norm() > 0 && numberPoint > 0) {
+            double d = N.dot(P);
+            const long n = cloud.getVertices().rows();
 
-            // --- Check if in range and if normals match ---
-            double dist = (_V.dot(N) + d) / N.norm();
-            if(dist < T && _N.dot(N) < alpha){
-                inliers_idx(idx_counter,0) = i;
-                idx_counter++;
+            Eigen::Matrix<double, 1, 3> _V, _N;
+
+            int idx_counter = 0;
+            for (int i = 0; i < n; i++) {
+                _V = cloud.getVertices().row(i);
+                _N = cloud.getVertices().row(i).normalized();
+
+                // --- Check if in range and if normals match ---
+                double dist = std::abs((_V.dot(N) + d) / N.norm());
+               // std::cout << "dist : " << dist << std::endl;
+
+                if (dist < T && std::abs(_N.dot(N)) < alpha) {
+                    inliers_idx(idx_counter, 0) = i;
+                    idx_counter++;
+                }
             }
+            std::cout << "Number index : " << idx_counter << std::endl;
+            if (idx_counter > 0) inliers_idx = inliers_idx.topRows(idx_counter - 1);
         }
-        std::cout << "Number index : " << idx_counter << std::endl ;
-        inliers_idx = inliers_idx.topRows(idx_counter-1) ;
+
         return inliers_idx ;
     }
 }

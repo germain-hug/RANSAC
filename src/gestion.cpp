@@ -159,7 +159,8 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         if (isPlane(thisVertex, thisNormal, thresh, alpha)) {
             // ---- Create a new plane and compute its score ----
             Eigen::Matrix<double, 1,3> planeNormal = computeNormal(thisVertex, thisNormal.row(0));
-            Eigen::Matrix<double, 1,3> planeRefPoint = V.colwise().mean();
+            Eigen::Matrix<double, 1,3> planeRefPoint = thisVertex.colwise().mean();
+            std::cout << "planeRefPoint" << planeRefPoint << std::endl;
 
             Primitive* newPlane = new Plane(planeRefPoint, planeNormal);
             newPlane->computeScore(variance, cloud, thresh, alpha);
@@ -167,7 +168,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
             // ---- Store it in the cloudPrimitive ----
             primitives.addPrimitive(newPlane);
-        } 
+        }
     }
 
     /*** ----------- isPlane() ----------- ***/
@@ -233,8 +234,8 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                         }
                     }// ---- They are both Planes ---
                     else{
-                        double d1 = (first_prim->getNormal().dot(second_prim->getNormal()));
-                        double d2 = (first_prim->getRefPoint() - second_prim->getRefPoint()).dot(first_prim->getNormal());
+                        double d1 = std::abs((first_prim->getNormal().dot(second_prim->getNormal())));
+                        double d2 = std::abs((first_prim->getRefPoint() - second_prim->getRefPoint()).dot(first_prim->getNormal()));
                         if(d1 < T_norm && d2 < T_refPt){
                             fuses.push_back(std::make_pair(i,j));
                         }
