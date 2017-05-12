@@ -143,8 +143,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                       DecoratedCloud &cloud,
                       CloudPrimitive &primitives,
                       double thresh, double alpha) {        
-        Eigen::MatrixXd V = cloud.getVertices(),
-        N = cloud.getNormals();
+        Eigen::MatrixXd V = cloud.getVertices(), N = cloud.getNormals();
         const int cloudSize = V.rows();
         const int nSamples = sample_idx.rows();
 
@@ -160,7 +159,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             // ---- Create a new plane and compute its score ----
             Eigen::Matrix<double, 1,3> planeNormal = computeNormal(thisVertex, thisNormal.row(0));
             Eigen::Matrix<double, 1,3> planeRefPoint = thisVertex.colwise().mean();
-            std::cout << "planeRefPoint" << planeRefPoint << std::endl;
+            std::cout << "Vertices to compute planeRefPoint" << thisVertex << std::endl;
 
             Primitive* newPlane = new Plane(planeRefPoint, planeNormal);
             newPlane->computeScore(variance, cloud, thresh, alpha);

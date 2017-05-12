@@ -61,7 +61,8 @@ namespace acq {
         Eigen::MatrixXd inliers2D(n, 2);
         Eigen::MatrixXd this_vertex ;
         int idx;
-        //std::cout << cloud.getVertices() << std::endl;
+
+
         for(int i = 0; i<n; i++){
             idx = inliers_idx(i,0);
             this_vertex = cloud.getVertices().row(idx); /// ---- NaN !!!!!
