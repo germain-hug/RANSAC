@@ -12,7 +12,7 @@ namespace acq {
             bool prim_detected = false, test_thisSphere, test_thisPlane, test ;
             int bestPrim_idx, nbAllPrim ;
             double best_score ;
-            int newSize ;
+            int newSize, n_inliers ;
             bool primitiveFound = false ;
             // compute the variance 
             Eigen::Matrix3d variance = computeVariance(cloud.getVertices()) ;
@@ -28,16 +28,16 @@ namespace acq {
                     thisSample = sample(numberOfPoint) ;
 
                     // test for the primitive, if they exist : add them in the cloud primitive 
-                    //computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
-                    computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
+                    computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
+                    //computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
                 }
 
                 nbAllPrim = allPrimitive.getCloudSize() ;
-                
+
                 // if a primitive has been created in the turn 
                 if (nbAllPrim>0) {
                     // get back the best primitive 
-                    bestPrim_idx = allPrimitive.findBestScore() ;
+                    bestPrim_idx = allPrimitive.findBestScore() ;                    
                     Primitive* best_prim = allPrimitive.getPrimitive(bestPrim_idx) ;
 
                     // test for the score 
@@ -45,15 +45,23 @@ namespace acq {
 
                     // store the results both in primitives and clou
                     if (best_score > thresh_best) {
-                        best_primitives.addPrimitive(best_prim) ;
+                        thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;                     
+                        n_inliers = thisInliers.rows();
 
-                        thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;
+                        if(n_inliers > 1) {
+                            // copy the primitive to store and add it to the newCloud                           
+                            Primitive* prim_Storage = new Primitive(*best_prim) ; 
+                            best_primitives.addPrimitive(prim_Storage) ;
 
-                        cleanCloud(cloud, cloudManager, thisInliers) ;
-
-                        newSize = cloud.getVertices().rows() ;
-
-                        primitiveFound = true ;
+                            cleanCloud(cloud, cloudManager, thisInliers) ;
+                            newSize = cloud.getVertices().rows() ;
+                            primitiveFound = true ;
+                        }
+                    }
+                    else {
+                        // if the primitive isn't good enough, not take into account
+                        std::cout << "problem ici" <<std::endl ;
+                        allPrimitive.deletePrimitive(bestPrim_idx) ;
                     }
 
                     if (newSize < 3) {
@@ -61,10 +69,13 @@ namespace acq {
                     }
                 }
             }
-
             std::cout << "sortie de RANSAC" << std::endl ;
-            return primitiveFound ;
-            // cloudManager and cloudPrimitive contains the result of the function 
+            
+            // free the memory allocated with all the primitives not used 
+            allPrimitive.clearAllPrimitives() ;
+
+            // cloudManager and cloudPrimitive contains the result of the function
+            return primitiveFound ; // Just return a bool
     };
 
 }

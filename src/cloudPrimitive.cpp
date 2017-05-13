@@ -58,26 +58,18 @@ int CloudPrimitive::findBestScore() {
 
 // delete the primitive at the position index
 void CloudPrimitive::deletePrimitive(int index) {
-            std::cout << "Enter delete " <<std::endl ;
-
         delete this->getPrimitive(index);
-
-                    std::cout << "Prim delete " << std::endl ;
-
-    _primitives.erase(_primitives.begin() + index-1);
-
-                        std::cout << "vector erase " << std::endl ;
-
+        _primitives.erase(_primitives.begin() + index);
 }
 
+// delete all the primitives and the vector 
 void CloudPrimitive::clearAllPrimitives() {
-                            std::cout << "enter clear all prim " << std::endl ;
+    std::vector<Primitive*>::iterator thisPrimIt;
 
-        int size = this->getCloudSize() ;
-        std::cout << "this Size : " << size << std::endl ;
-        for (int i=0; i<size; i++) {
-            this->deletePrimitive(i) ;
-        }
+    for ( thisPrimIt = _primitives.begin(); thisPrimIt != _primitives.end(); ) {
+        delete * thisPrimIt;  
+        thisPrimIt = _primitives.erase(thisPrimIt);
+    }
 }
 
 

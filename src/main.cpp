@@ -70,13 +70,6 @@ int main(int argc, char *argv[]) {
     // Maximum distance between vertices to be considered neighbours (FLANN mode)
     float maxNeighbourDist = 0.15; //TODO: set to average vertex distance upon read
 
-    // Dummy enum to demo GUI
-    enum Orientation { Up=0, Down, Left, Right } dir = Up;
-    // Dummy variable to demo GUI
-    bool boolVariable = true;
-    // Dummy variable to demo GUI
-    float floatVariable = 0.1f;
-
     // ********* VARIABLES FOR THE ALGORITHM  ********* 
     int nbIteration = 5 ; 
     int samplePerIt = 5 ;
@@ -88,14 +81,25 @@ int main(int argc, char *argv[]) {
     acq::CloudManager cloudManagerParts ;
 
     // deals with several meshes 
-    enum MeshType { test1=0, test2, test3} typeMesh = test1 ;
+    enum MeshType { mesh1=0, mesh2} typeMesh = mesh1 ;
     //************************************
     
     // Load a mesh in OFF format
-    std::string meshPath = "../models/sphere.off";
+    std::string meshPath1 = "../models/sphere.off";
     if (argc > 1) {
-        meshPath = std::string(argv[1]);
-        if (meshPath.find(".obj") == std::string::npos) {
+        meshPath1 = std::string(argv[1]);
+        if (meshPath1.find(".obj") == std::string::npos) {
+            std::cerr << "Only ready for  OBJ files for now...\n";
+            return EXIT_FAILURE;
+        }
+    } else {
+        std::cout << "Usage: iglFrameWork <path-to-off-mesh.obj>." << "\n";
+    }
+
+    std::string meshPath2 = "../models/sphere_cube.off";
+    if (argc > 1) {
+        meshPath2 = std::string(argv[1]);
+        if (meshPath2.find(".obj") == std::string::npos) {
             std::cerr << "Only ready for  OBJ files for now...\n";
             return EXIT_FAILURE;
         }
@@ -112,14 +116,13 @@ int main(int argc, char *argv[]) {
     acq::CloudManager cloudManagerOldMesh;
     // Read mesh from meshPath
     {
-        Eigen::MatrixXd V, TC, N;
-        Eigen::MatrixXi F, FTC, FN;
-        igl::readOFF(meshPath, V, F);
-
-        //if(FTC.size() == 0) FTC = F;
+        // == ******** For the first mesh ******* ==
+        Eigen::MatrixXd V;
+        Eigen::MatrixXi F;
+        igl::readOFF(meshPath1, V, F);
 
         if (V.rows() <= 0) {
-            std::cerr << "Could not read mesh at " << meshPath
+            std::cerr << "Could not read mesh at " << meshPath1
                       << "...exiting...\n";
             return EXIT_FAILURE;
         }
@@ -129,10 +132,29 @@ int main(int argc, char *argv[]) {
         Eigen::MatrixXd max_col = V.colwise().maxCoeff();
         V /= std::max(max_row.maxCoeff(), max_col.maxCoeff());
 
+        cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V, F));
+
+        // == ******** For the second mesh ******* ==
+
+        Eigen::MatrixXd V2;
+        Eigen::MatrixXi F2;
+        igl::readOFF(meshPath2, V2, F2);
+
+        if (V2.rows() <= 0) {
+            std::cerr << "Could not read mesh at " << meshPath2
+                      << "...exiting...\n";
+            return EXIT_FAILURE;
+        }
+
+        // ----- Normalize Vertices -----
+        Eigen::MatrixXd max_row2 = V2.rowwise().maxCoeff();
+        Eigen::MatrixXd max_col2 = V2.colwise().maxCoeff();
+        V2 /= std::max(max_row2.maxCoeff(), max_col2.maxCoeff());
+
+        cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V2, F2));
+
         // Store read vertices and faces
         //N.rowwise().normalize();
-
-        cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V, F));
 
         // Set Normals from OBJ file
         //cloudManagerOldMesh.getCloud(typeMesh).setNormals(N);
@@ -156,7 +178,7 @@ int main(int argc, char *argv[]) {
     viewer.callback_init =
         [
             &cloudManagerOldMesh, &kNeighbours, &maxNeighbourDist,
-            &floatVariable, &boolVariable, &dir, &nbIteration, &samplePerIt, 
+            &nbIteration, &samplePerIt, 
             &best_primitives, &cloudManagerParts, &thresh, &alpha, &thresh_best, 
             &typeMesh 
         ] (igl::viewer::Viewer& viewer)
@@ -168,7 +190,7 @@ int main(int argc, char *argv[]) {
         viewer.ngui->addGroup("Choose your mesh");
 
         viewer.ngui->addVariable<MeshType>("Which mesh do you want ?",typeMesh)->setItems(
-            {"Mesh1","Mesh2","Mesh3"}
+            {"Sphere","Sphere & Cube"}
         );
 
         viewer.ngui->addButton("Show the original mesh",
@@ -182,10 +204,11 @@ int main(int argc, char *argv[]) {
 
             // clean all the primitives   
             best_primitives.clearAllPrimitives() ;
-            std::cout << "bestPrimcleaned" << std::endl ;
+            
             // clear the cloudManager 
+            std::cout << "everyThing fine 1, size : " << best_primitives.getCloudSize() << std::endl ;
             cloudManagerParts.clearCloud() ;
-            std::cout << "cloudManager" << std::endl ;
+            std::cout << "everyThing fine, size : " << cloudManagerParts.getCloudSize() << std::endl ;
         });        
 
        viewer.ngui->addButton("Compute Normals",
@@ -272,12 +295,17 @@ int main(int argc, char *argv[]) {
 
           viewer.ngui->addButton("RANSAC",
                                [&]() {
-            // set the vertices
-            acq::DecoratedCloud& thisCloud = cloudManagerOldMesh.getCloud(typeMesh) ;
+            // get back the cloud we want to work on 
+            acq::DecoratedCloud thisCloud = cloudManagerOldMesh.getCloud(typeMesh) ;
+
+std::cout << "before RANSAC OK " <<  std::endl ;
 
              // apply RANSAC 
              bool ransacSuccess = ransac(thisCloud, best_primitives, cloudManagerParts, 
                 thresh, alpha, thresh_best, nbIteration, samplePerIt) ;
+
+std::cout << "test size prim : " << best_primitives.getCloudSize() << std::endl ;
+std::cout << "test size cloud : " << cloudManagerParts.getCloudSize() << std::endl ;
 
             if (ransacSuccess) {
                 // fuse the result in the new cloud 
@@ -287,6 +315,7 @@ int main(int argc, char *argv[]) {
 
                 // Show mesh
                 viewer.data.set_points(newCloud->getVertices(), newCloud->getColors()) ;
+                viewer.core.show_overlay = true;
             }
 
             else {

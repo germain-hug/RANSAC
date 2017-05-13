@@ -60,9 +60,14 @@ namespace acq {
                 }
             }   
         }
-        // only get back the important part 
-        inliers_idx = inliers_idx.topRows(index_inliers-1) ;
 
+        // only get back the important part 
+        if (index_inliers == 0) {
+            inliers_idx = inliers_idx.topRows(1);
+        }
+        else {
+            inliers_idx = inliers_idx.topRows(index_inliers - 1);
+        }
         return inliers_idx ;
     }
 }

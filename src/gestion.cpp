@@ -310,7 +310,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
 
     void cleanCloud(DecoratedCloud& cloudRansac, CloudManager& cloudManager, Eigen::MatrixXi inliers_idx){
-        std::cout << "Enter Clean Cloud" << std::endl;
         // ---- We remove inliers from cloudRansac -----
         int n_inliers = inliers_idx.rows();
 
@@ -342,14 +341,17 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                     outliers_valid++;
                 }
              }
-               //          Eigen::MatrixXd N_out_top = N_out.block(0,0,inliers_valid-1,3);
+            // Eigen::MatrixXd N_out_top = N_out.block(0,0,inliers_valid-1,3);
             Eigen::MatrixXd N_out_top = N_out.topRows(outliers_valid-1);
-            
+
             cloudManager.addCloud(DecoratedCloud(V_out.topRows(outliers_valid-1),N_out_top)); // Store cloud of inliers
             cloudRansac.setVertices(V_in.topRows(inliers_valid-1)); // Keep cloud deprived from inliers
             cloudRansac.setNormals(N_in.topRows(inliers_valid-1));
         }
-        std::cout << "Exit Clean Cloud" << std::endl;
+//        std::cout << "Exit Clean Cloud" << std::endl;
+//        std::cout << "test size cloud Manager : " << cloudManager.getCloudSize() << std::endl ;
+//        std::cout << "test size cloud : " << cloudRansac.getVertices().rows() << std::endl ;
+
     }
 }
 

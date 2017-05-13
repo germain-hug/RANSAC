@@ -15,6 +15,9 @@ public:
     /** \brief Default constructor leaving fields empty. */
     explicit DecoratedCloud() {}
 
+    // destructeur for get cloud 
+    ~DecoratedCloud() {} 
+
     /** \brief Constructor filling point information only. */
     explicit DecoratedCloud(CloudT const& vertices);
 

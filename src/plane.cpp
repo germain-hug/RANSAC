@@ -128,7 +128,13 @@ namespace acq {
                 }
             }
             std::cout << "Number index : " << idx_counter << std::endl;
-            if (idx_counter > 0) inliers_idx = inliers_idx.topRows(idx_counter - 1);
+            
+            if (idx_counter == 0) {
+                inliers_idx = inliers_idx.topRows(1);
+            }
+            else {
+                inliers_idx = inliers_idx.topRows(idx_counter - 1) ;
+            }
         }
 
         return inliers_idx ;
