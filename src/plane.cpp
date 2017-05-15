@@ -8,26 +8,27 @@ namespace acq {
 
         // --- Compute the Plane Inliers ---
         Eigen::MatrixXi inliers_idx =  this->computeInliers(cloud,T,alpha) ;
-        this->setInliers_idx(inliers_idx) ;
-        std::cout << "Inliers set " << std::endl ;
+        if(inliers_idx.rows() > 0) {
+            this->setInliers_idx(inliers_idx);
 
 
-        // --- Estimate the density of our plane ---
-        std::cout << "inliers rows = " << inliers_idx.rows() << std::endl;
-        int optimalInliers = this->findBestNumberPoints(var, cloud, inliers_idx) ;
+            // --- Estimate the density of our plane ---
+            int optimalInliers = this->findBestNumberPoints(var, cloud, inliers_idx);
 
-        std::cout << "optimalInliers : " << optimalInliers << " | inliers_idx.rows(): "<< inliers_idx.rows() << std::endl ;
+            std::cout << "optimalInliers : " << optimalInliers << " | inliers_idx.rows(): " << inliers_idx.rows()
+                      << std::endl;
 
-        // --- Compute the plane score ---
-        //if the number are closed, the score is high, otherwise it's low
-        double score = 100.0 - double(std::abs(inliers_idx.rows()-optimalInliers)) /
-                double(std::max(int(inliers_idx.rows()),optimalInliers))*100;
+            // --- Compute the plane score ---
+            //if the number are closed, the score is high, otherwise it's low
+            double score = 100.0 - double(std::abs(inliers_idx.rows() - optimalInliers)) /
+                                   double(std::max(int(inliers_idx.rows()), optimalInliers)) * 100;
 
-        std::cout << "Score final : " << score << "%" << std::endl ;
-
-        // --- Set the score for this primitive ---
-        this->setScore(score) ;
-        std::cout << "Score set : " << score << std::endl ;
+            // --- Set the score for this primitive ---
+            this->setScore(score);
+            std::cout << "Score set : " << score << std::endl;
+        } else {
+            std::cout << "No Inliers found for this primitive" << std::endl;
+        }
     }
 
     /// ------- findBestNumberPoints() ------
@@ -51,25 +52,20 @@ namespace acq {
         Eigen::MatrixXd v = u.row(0).cross(N.row(0));
         if(v.norm()!=0.0) v.normalize();
 
-        std::cout << " u " << u << " N " << N << std::endl;
-
-
-        std::cout << "Basis for the point u : " << u << "and v : " << v << std::endl ;
+        std::cout << "Basis u " << u << " v " << v << " N " << N << std::endl ;
         
         // --- Retrieve Inliers and project on (u,v) basis ---
         const int n = inliers_idx.rows();
         Eigen::MatrixXd inliers2D(n, 2);
         Eigen::MatrixXd this_vertex ;
         int idx;
-
-
+        
         for(int i = 0; i<n; i++){
             idx = inliers_idx(i,0);
             this_vertex = cloud.getVertices().row(idx); /// ---- NaN !!!!!
             inliers2D(i,0) = u.row(0).dot(this_vertex.row(0));
             inliers2D(i,1) = v.row(0).dot(this_vertex.row(0));
         }
-        std::cout << "Inliers 2D OK " << std::endl ;
 
         // --- Compute Plane Area ---
         double x_min = inliers2D.col(0).minCoeff();
@@ -79,17 +75,14 @@ namespace acq {
 
         double thisArea = std::abs(y_max-y_min)*std::abs(x_max-x_min);
 
-        std::cout << "this Area : " << thisArea << std::endl;
 
         // --- Estimate Optimal Number of Points ---
         double var_x = u.row(0).dot(var.diagonal());
         double var_y = v.row(0).dot(var.diagonal());
-        //double meanVariance = sqrt(pow(var_x,2.0)+pow(var_y,2.0));
-        double meanVariance = std::abs((var_x + var_y)/2.0);
-
-        std::cout << "mean var" << meanVariance << std::endl;
-        int numberPoints = floor(thisArea/(meanVariance));
-        std::cout << "final number of point : " << numberPoints << std::endl;
+        double meanVariance = (pow(var_x,2.0)+pow(var_y,2.0));
+        //double meanVariance = std::abs((var_x + var_y)/2.0);
+        std::cout << " Area : " << thisArea << " Mean var : " << meanVariance << std::endl;
+        int numberPoints = floor(thisArea/(pow(meanVariance,2.0)));
 
         return numberPoints ;
 
@@ -97,7 +90,6 @@ namespace acq {
 
     /// ------- computeInliers() ------
     Eigen::MatrixXi Plane::computeInliers(DecoratedCloud& cloud, double T, double alpha) {
-        std::cout << "ah coucou debut func plaaaan" << std::endl ;
 
         int numberPoint = cloud.getVertices().rows();
         Eigen::MatrixXi inliers_idx(numberPoint, 1);
@@ -113,22 +105,19 @@ namespace acq {
 
             Eigen::Matrix<double, 1, 3> _V, _N;
 
-            int idx_counter = 0;
+            int idx_counter = 0; double dist = 0;
             for (int i = 0; i < n; i++) {
                 _V = cloud.getVertices().row(i);
                 _N = cloud.getVertices().row(i).normalized();
 
                 // --- Check if in range and if normals match ---
-                double dist = std::abs((_V.dot(N) + d) / N.norm());
-               // std::cout << "dist : " << dist << std::endl;
-
-                if (dist < T && std::abs(_N.dot(N)) < alpha) {
+                dist = std::abs((_V.dot(N) + d) / N.norm());
+                if (dist < T && std::abs(_N.dot(N)) > alpha) {
                     inliers_idx(idx_counter, 0) = i;
                     idx_counter++;
                 }
             }
-            std::cout << "Number index : " << idx_counter << std::endl;
-            
+
             if (idx_counter == 0) {
                 inliers_idx = inliers_idx.topRows(1);
             }

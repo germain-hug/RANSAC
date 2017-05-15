@@ -28,8 +28,8 @@ namespace acq {
                     thisSample = sample(numberOfPoint) ;
 
                     // test for the primitive, if they exist : add them in the cloud primitive 
-                    computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
-                    //computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
+                    //computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
+                    computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
                 }
 
                 nbAllPrim = allPrimitive.getCloudSize() ;
