@@ -175,7 +175,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         Eigen::Matrix<double, 1,3> planeNormal = computeNormal(V, N.row(0));
         bool isPlane = true;
         for (int i = 0; i < N.rows(); i++) {
-            if (N.row(i).dot(planeNormal) < T) isPlane = false;
+            if (std::abs(N.row(i).dot(planeNormal)) > alpha) isPlane = false;
         }
         return isPlane;
     }
