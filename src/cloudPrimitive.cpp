@@ -38,7 +38,7 @@ int CloudPrimitive::findBestScore() {
     int numberPrim = _primitives.size() ;
     double bestScore = 0 ;
     double thisScore ;
-    int bestPrimIdx ;
+    int bestPrimIdx = 0 ;
 
     // go over all the primitives to find the best score
     for (int i=0; i<numberPrim ; i++) {
@@ -52,7 +52,6 @@ int CloudPrimitive::findBestScore() {
             bestScore = thisScore ;
         }
     }
-
     return bestPrimIdx ;
 }
 

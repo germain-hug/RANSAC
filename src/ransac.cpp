@@ -37,14 +37,18 @@ namespace acq {
                 // if a primitive has been created in the turn 
                 if (nbAllPrim>0) {
                     // get back the best primitive 
-                    bestPrim_idx = allPrimitive.findBestScore() ;                    
+                    bestPrim_idx = allPrimitive.findBestScore() ;
+
                     Primitive* best_prim = allPrimitive.getPrimitive(bestPrim_idx) ;
 
                     // test for the score 
                     best_score = best_prim->getScore() ;
 
-                    // store the results both in primitives and clou
+                    // store the results both in primitives and cloud
                     if (best_score > thresh_best) {
+
+                        std::cout << best_score << std::endl ;
+
                         thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;                     
                         n_inliers = thisInliers.rows();
 
@@ -57,10 +61,11 @@ namespace acq {
                             newSize = cloud.getVertices().rows() ;
                             primitiveFound = true ;
                         }
+
+                        allPrimitive.deletePrimitive(bestPrim_idx) ;
                     }
                     else {
                         // if the primitive isn't good enough, not take into account
-                        std::cout << "problem ici" <<std::endl ;
                         allPrimitive.deletePrimitive(bestPrim_idx) ;
                     }
 
@@ -68,9 +73,7 @@ namespace acq {
                         break ;
                     }
                 }
-            }
-            std::cout << "sortie de RANSAC" << std::endl ;
-            
+            }            
             // free the memory allocated with all the primitives not used 
             allPrimitive.clearAllPrimitives() ;
 

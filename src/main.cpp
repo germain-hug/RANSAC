@@ -71,11 +71,11 @@ int main(int argc, char *argv[]) {
     float maxNeighbourDist = 0.15; //TODO: set to average vertex distance upon read
 
     // ********* VARIABLES FOR THE ALGORITHM  ********* 
-    int nbIteration = 5 ; 
-    int samplePerIt = 5 ;
-    double thresh = 0.9 ;
-    double alpha = 0.60 ;
-    double thresh_best = 50.0 ;
+    int nbIteration = 300 ; 
+    int samplePerIt = 10 ;
+    double thresh = 0.1 ;
+    double alpha = 0.9 ;
+    double thresh_best = 80.0 ;
     // will store the current primitives and the point cloud per primitives
     acq::CloudPrimitive best_primitives ;
     acq::CloudManager cloudManagerParts ;
@@ -206,9 +206,7 @@ int main(int argc, char *argv[]) {
             best_primitives.clearAllPrimitives() ;
             
             // clear the cloudManager 
-            std::cout << "everyThing fine 1, size : " << best_primitives.getCloudSize() << std::endl ;
             cloudManagerParts.clearCloud() ;
-            std::cout << "everyThing fine, size : " << cloudManagerParts.getCloudSize() << std::endl ;
         });        
 
        viewer.ngui->addButton("Compute Normals",
@@ -298,14 +296,9 @@ int main(int argc, char *argv[]) {
             // get back the cloud we want to work on 
             acq::DecoratedCloud thisCloud = cloudManagerOldMesh.getCloud(typeMesh) ;
 
-std::cout << "before RANSAC OK " <<  std::endl ;
-
              // apply RANSAC 
              bool ransacSuccess = ransac(thisCloud, best_primitives, cloudManagerParts, 
                 thresh, alpha, thresh_best, nbIteration, samplePerIt) ;
-
-std::cout << "test size prim : " << best_primitives.getCloudSize() << std::endl ;
-std::cout << "test size cloud : " << cloudManagerParts.getCloudSize() << std::endl ;
 
             if (ransacSuccess) {
                 // fuse the result in the new cloud 
