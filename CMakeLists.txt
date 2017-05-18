@@ -115,6 +115,8 @@ set(SOURCE_FILES
     	include/acq/typedefs.h
     	include/acq/normalEstimation.h
     	include/acq/impl/normalEstimation.hpp
+    	include/acq/evaluation.h
+    	include/acq/impl/evaluation.hpp
 		include/acq/ransac.h
 		include/acq/impl/ransac.hpp
 		include/acq/gestion.h
@@ -128,6 +130,7 @@ set(SOURCE_FILES
     	include/acq/decoratedCloud.h
     	include/acq/impl/decoratedCloud.hpp
 		src/gestion.cpp
+		src/evaluation.cpp 
 		src/ransac.cpp
 		src/cloudPrimitive.cpp
 		src/plane.cpp
