@@ -31,6 +31,7 @@ namespace acq {
                     //computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
                     computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
                 }
+                std::cout << "iter "<< std::endl;
 
                 nbAllPrim = allPrimitive.getCloudSize() ;
 

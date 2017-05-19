@@ -4,7 +4,6 @@ namespace acq {
 
     /// ------- computeScore() ------
     void Plane::computeScore(Eigen::Matrix3d var, DecoratedCloud& cloud, double T, double alpha) {
-        std::cout << "Entered in compute score "<< std::endl ;
 
         // --- Compute the Plane Inliers ---
         Eigen::MatrixXi inliers_idx =  this->computeInliers(cloud,T,alpha) ;
@@ -13,19 +12,22 @@ namespace acq {
 
 
             // --- Estimate the density of our plane ---
-            int optimalInliers = this->findBestNumberPoints(var, cloud, inliers_idx);
+            //int optimalInliers = this->findBestNumberPoints(var, cloud, inliers_idx);
 
-            std::cout << "optimalInliers : " << optimalInliers << " | inliers_idx.rows(): " << inliers_idx.rows()
-                      << std::endl;
+            //std::cout << "optimalInliers : " << optimalInliers << " | inliers_idx.rows(): " << inliers_idx.rows()
+            //          << std::endl;
 
             // --- Compute the plane score ---
             //if the number are closed, the score is high, otherwise it's low
-            double score = 100.0 - double(std::abs(inliers_idx.rows() - optimalInliers)) /
-                                   double(std::max(int(inliers_idx.rows()), optimalInliers)) * 100;
+            //double score = 100.0 - double(std::abs(inliers_idx.rows() - optimalInliers)) /
+             //                      double(std::max(int(inliers_idx.rows()), optimalInliers)) * 100;
+
+            double score = 100.0 - double(std::abs(inliers_idx.rows() - 121)) /
+                                                         double(std::max(int(inliers_idx.rows()), 121)) * 100;
 
             // --- Set the score for this primitive ---
             this->setScore(score);
-            std::cout << "Score set : " << score << std::endl;
+            std::cout << " inliers_idx.rows(): " << inliers_idx.rows() << " Score set : " << score << std::endl;
         } else {
             std::cout << "No Inliers found for this primitive" << std::endl;
         }
@@ -59,7 +61,7 @@ namespace acq {
         Eigen::MatrixXd inliers2D(n, 2);
         Eigen::MatrixXd this_vertex ;
         int idx;
-        
+
         for(int i = 0; i<n; i++){
             idx = inliers_idx(i,0);
             this_vertex = cloud.getVertices().row(idx); /// ---- NaN !!!!!
@@ -97,10 +99,8 @@ namespace acq {
         Eigen::Matrix<double, 1, 3> N = this->getNormal().normalized();
         Eigen::Matrix<double, 1, 3> P = this->getRefPoint();
 
-        std::cout << "N : " << N << std::endl;
-
         if( N.norm() > 0 && numberPoint > 0) {
-            double d = N.dot(P);
+            double d = -std::abs(N.dot(P));
             const long n = cloud.getVertices().rows();
 
             Eigen::Matrix<double, 1, 3> _V, _N;
@@ -111,7 +111,9 @@ namespace acq {
                 _N = cloud.getVertices().row(i).normalized();
 
                 // --- Check if in range and if normals match ---
-                dist = std::abs((_V.dot(N) + d) / N.norm());
+                //dist = std::abs((_V.dot(N) + d) / N.norm());
+                dist = std::abs((N.dot(_V - P)) / N.norm());
+                //std::cout << " dist " << dist << " T " << T << " std::abs(_N.dot(N)) " << std::abs(_N.dot(N)) << std::endl;
                 if (dist < T && std::abs(_N.dot(N)) > alpha) {
                     inliers_idx(idx_counter, 0) = i;
                     idx_counter++;
