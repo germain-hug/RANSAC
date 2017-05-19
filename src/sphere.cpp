@@ -11,9 +11,14 @@ namespace acq {
         // Look how many point are supposed to be there  
         int bestNumber = this->findBestNumberPoints(variance) ;
 
+        std::cout << "Best number " << bestNumber << std::endl ;
         // compute the score 
         int numberInliers = inliers_idx.rows() ;
+
         double score = (double(numberInliers)/double(bestNumber))*100.0 ;
+
+        std::cout << "Inliers " << numberInliers << std::endl ;
+        std::cout << "score " << score << std::endl ;
 
         // set the score for this primitive 
         this->setScore(score) ;
@@ -22,9 +27,18 @@ namespace acq {
     // find the best number of point for this sphere accordingly to the radius and the variance of points 
     int Sphere::findBestNumberPoints(Eigen::Matrix3d variance) {
         double thisArea = M_PI*4.0*pow(_radius, 2.0) ;
-        double meanVariance = (variance(1,1)+variance(2,2)+variance(3,3))/3.0 ;
+        Eigen::Matrix<double, 1,3> varianceVector = variance.diagonal() ; 
+    
+std::cout << "varianceVector : "<< varianceVector << std::endl ;
 
-        double areaAroundPoint = M_PI*pow(meanVariance, 2.0) ;
+        double meanVariance = varianceVector.norm() ;
+
+std::cout << "mean Variance : "<< meanVariance << std::endl ;
+
+        double areaAroundPoint = M_PI*pow(meanVariance/4.7, 2.0) ;
+
+        std::cout << "small area : "<< areaAroundPoint << std::endl ;
+
         int numberPoints = floor(thisArea/areaAroundPoint) ;
 
         return numberPoints ;

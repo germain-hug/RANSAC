@@ -1,3 +1,4 @@
+#include "acq/evaluation.h"
 #include "acq/normalEstimation.h"
 #include "acq/ransac.h"
 
@@ -76,6 +77,9 @@ int main(int argc, char *argv[]) {
     double thresh = 0.1 ;
     double alpha = 0.9 ;
     double thresh_best = 80.0 ;
+    float noise = 0.6 ;
+    int numberOfOldMesh = 2 ;
+
     // will store the current primitives and the point cloud per primitives
     acq::CloudPrimitive best_primitives ;
     acq::CloudManager cloudManagerParts ;
@@ -132,8 +136,6 @@ int main(int argc, char *argv[]) {
         Eigen::MatrixXd max_col = V.colwise().maxCoeff();
         V /= std::max(max_row.maxCoeff(), max_col.maxCoeff());
 
-        cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V, F));
-
         // == ******** For the second mesh ******* ==
 
         Eigen::MatrixXd V2;
@@ -151,7 +153,10 @@ int main(int argc, char *argv[]) {
         Eigen::MatrixXd max_col2 = V2.colwise().maxCoeff();
         V2 /= std::max(max_row2.maxCoeff(), max_col2.maxCoeff());
 
-        cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V2, F2));
+        for (int i=0; i<2; i++) {
+            cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V, F));
+            cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V2, F2));
+        }
 
         // Store read vertices and faces
         //N.rowwise().normalize();
@@ -180,7 +185,7 @@ int main(int argc, char *argv[]) {
             &cloudManagerOldMesh, &kNeighbours, &maxNeighbourDist,
             &nbIteration, &samplePerIt, 
             &best_primitives, &cloudManagerParts, &thresh, &alpha, &thresh_best, 
-            &typeMesh 
+            &typeMesh, &noise, &numberOfOldMesh
         ] (igl::viewer::Viewer& viewer)
     {
         // Add an additional menu window
@@ -198,8 +203,8 @@ int main(int argc, char *argv[]) {
             viewer.data.clear() ;
             // Show mesh
             viewer.data.set_mesh(
-                             cloudManagerOldMesh.getCloud(typeMesh).getVertices(),
-                             cloudManagerOldMesh.getCloud(typeMesh).getFaces()
+                             cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh).getVertices(),
+                             cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh).getFaces()
             ); 
 
             // clean all the primitives   
@@ -207,15 +212,18 @@ int main(int argc, char *argv[]) {
             
             // clear the cloudManager 
             cloudManagerParts.clearCloud() ;
+
+            // replace by the original mesh 
+            cloudManagerOldMesh.setCloud(cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh), typeMesh) ;
         });        
 
        viewer.ngui->addButton("Compute Normals",
                                [&]() {
 
-        cloudManagerOldMesh.getCloud(typeMesh).setNormals(
+        cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh).setNormals(
                 acq::recalcNormals(
                         /* [in]      K-neighbours for FLANN: */ kNeighbours,
-                        /* [in]             Vertices matrix: */ cloudManagerOldMesh.getCloud(typeMesh).getVertices(),
+                        /* [in]             Vertices matrix: */ cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh).getVertices(),
                         /* [in]      max neighbour distance: */ maxNeighbourDist
                 )
         );
@@ -223,22 +231,30 @@ int main(int argc, char *argv[]) {
         // Estimate neighbours using FLANN
         acq::NeighboursT const neighbours =
                 acq::calculateCloudNeighboursFromFaces(
-                        /* [in] Faces: */ cloudManagerOldMesh.getCloud(typeMesh).getFaces()
+                        /* [in] Faces: */ cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh).getFaces()
                 );
 
         // Estimate normals for points in cloud vertices
-        cloudManagerOldMesh.getCloud(typeMesh).setNormals(
+        cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh).setNormals(
                 acq::calculateCloudNormals(
-                        /* [in]               Cloud: */ cloudManagerOldMesh.getCloud(typeMesh).getVertices(),
+                        /* [in]               Cloud: */ cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh).getVertices(),
                         /* [in] Lists of neighbours: */ neighbours
                 )
         );
 
         int nFlips =
                 acq::orientCloudNormalsFromFaces(
-                        /* [in    ] Lists of neighbours: */ cloudManagerOldMesh.getCloud(typeMesh).getFaces(),
-                        /* [in,out]   Normals to change: */ cloudManagerOldMesh.getCloud(typeMesh).getNormals()
+                        /* [in    ] Lists of neighbours: */ cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh).getFaces(),
+                        /* [in,out]   Normals to change: */ cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh).getNormals()
                 );
+
+        // also set to the second mesh 
+
+        // Estimate normals for points in cloud vertices
+        cloudManagerOldMesh.getCloud(typeMesh).setNormals(
+                            cloudManagerOldMesh.getCloud(typeMesh+numberOfOldMesh).getNormals()
+        );
+
 
         viewer.data.clear() ;
 
@@ -340,7 +356,29 @@ int main(int argc, char *argv[]) {
 
              viewer.data.set_colors(newCloud->getColors());
 
-        });         
+        });       
+
+        viewer.ngui->addGroup("Test noise");
+       
+       viewer.ngui->addVariable<float>( "% of noise", [&] (float val) {
+                noise = val;}, [&]() {
+                return noise; // get
+       } );
+
+       // adding noise for evaluation 
+       viewer.ngui->addButton("Add noise",[&]() {
+        // noise the position of the vertex 
+        cloudManagerOldMesh.getCloud(typeMesh).setVertices(addNoise(noise,cloudManagerOldMesh.getCloud(typeMesh),1)) ;
+
+        // noise the normals 
+        cloudManagerOldMesh.getCloud(typeMesh).setNormals(addNoise(noise,cloudManagerOldMesh.getCloud(typeMesh),2));  
+
+        viewer.data.clear() ;
+
+        viewer.data.set_mesh(
+            cloudManagerOldMesh.getCloud(typeMesh).getVertices(),
+            cloudManagerOldMesh.getCloud(typeMesh).getFaces()) ;
+        }) ;
 
         // Generate menu
         viewer.screen->performLayout();

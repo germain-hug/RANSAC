@@ -12,7 +12,7 @@ namespace acq {
             bool prim_detected = false, test_thisSphere, test_thisPlane, test ;
             int bestPrim_idx, nbAllPrim ;
             double best_score ;
-            int newSize, n_inliers ;
+            int newSize = 4, n_inliers ;
             bool primitiveFound = false ;
             // compute the variance 
             Eigen::Matrix3d variance = computeVariance(cloud.getVertices()) ;
@@ -28,8 +28,8 @@ namespace acq {
                     thisSample = sample(numberOfPoint) ;
 
                     // test for the primitive, if they exist : add them in the cloud primitive 
-                    //computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
-                    computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
+                    computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
+                    //computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
                 }
                 std::cout << "iter "<< std::endl;
 

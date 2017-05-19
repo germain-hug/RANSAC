@@ -31,7 +31,7 @@ Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
     Eigen::MatrixXd centered = V.rowwise() - V.colwise().mean();
 
     // compute the covariance matrix 
-    Eigen::Matrix3d cov = (centered.adjoint() * centered) / double(V.rows() - 1);
+    Eigen::Matrix3d cov = (centered.transpose() * centered) / double(V.rows());
     return cov ;
 }
 
