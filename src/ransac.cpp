@@ -10,7 +10,7 @@ namespace acq {
             Eigen::Matrix<int, 3,1> thisSample ;
             Eigen::MatrixXi thisInliers ; 
             bool prim_detected = false, test_thisSphere, test_thisPlane, test ;
-            int bestPrim_idx, nbAllPrim ;
+            int bestPrim_idx, nbAllPrim, i ;
             double best_score ;
             int newSize = 4, n_inliers ;
             bool primitiveFound = false ;
@@ -21,7 +21,7 @@ namespace acq {
             CloudPrimitive allPrimitive ;
 
             // create the primitive for this iteration 
-            for (int i=0 ; i<iterationsTotal; i++) {
+            for (i=0 ; i<iterationsTotal; i++) {
                 // sample the right amount of point 
                 for (int j=0; j<numberSample; j++) {
                     // sample the point 
@@ -31,7 +31,9 @@ namespace acq {
                     computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
                     //computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
                 }
-                std::cout << "iter "<< std::endl;
+
+                int test = i ;
+               // std::cout << "iter : " << test  << std::endl;
 
                 nbAllPrim = allPrimitive.getCloudSize() ;
 
@@ -47,9 +49,6 @@ namespace acq {
 
                     // store the results both in primitives and cloud
                     if (best_score > thresh_best) {
-
-                        std::cout << best_score << std::endl ;
-
                         thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;                     
                         n_inliers = thisInliers.rows();
 
@@ -61,9 +60,15 @@ namespace acq {
                             cleanCloud(cloud, cloudManager, thisInliers) ;
                             newSize = cloud.getVertices().rows() ;
                             primitiveFound = true ;
+
+std::cout << "the best score : " << best_score  << std::endl;
+std::cout << "number d'inliers : " << n_inliers  << std::endl;
+
                         }
 
                         allPrimitive.deletePrimitive(bestPrim_idx) ;
+
+
                     }
                     else {
                         // if the primitive isn't good enough, not take into account
@@ -77,7 +82,7 @@ namespace acq {
             }            
             // free the memory allocated with all the primitives not used 
             allPrimitive.clearAllPrimitives() ;
-
+std::cout << "i : " << i << std::endl ;
             // cloudManager and cloudPrimitive contains the result of the function
             return primitiveFound ; // Just return a bool
     };

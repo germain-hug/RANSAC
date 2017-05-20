@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
     //************************************
     
     // Load a mesh in OFF format
-    std::string meshPath1 = "../models/sphere.off";
+    std::string meshPath1 = "../models/sphere_cube.off";
     if (argc > 1) {
         meshPath1 = std::string(argv[1]);
         if (meshPath1.find(".obj") == std::string::npos) {
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Usage: iglFrameWork <path-to-off-mesh.obj>." << "\n";
     }
 
-    std::string meshPath2 = "../models/sphere_cube.off";
+    std::string meshPath2 = "../models/scene.off";
     if (argc > 1) {
         meshPath2 = std::string(argv[1]);
         if (meshPath2.find(".obj") == std::string::npos) {
@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
         viewer.ngui->addGroup("Choose your mesh");
 
         viewer.ngui->addVariable<MeshType>("Which mesh do you want ?",typeMesh)->setItems(
-            {"Sphere","Sphere & Cube"}
+            {"Sphere & Cube","Scene"}
         );
 
         viewer.ngui->addButton("Show the original mesh",

@@ -11,14 +11,13 @@ namespace acq {
         // Look how many point are supposed to be there  
         int bestNumber = this->findBestNumberPoints(variance) ;
 
-        std::cout << "Best number " << bestNumber << std::endl ;
         // compute the score 
         int numberInliers = inliers_idx.rows() ;
 
         double score = (double(numberInliers)/double(bestNumber))*100.0 ;
 
-        std::cout << "Inliers " << numberInliers << std::endl ;
-        std::cout << "score " << score << std::endl ;
+        //double score = 100.0 - double(std::abs(numberInliers - bestNumber)) /
+                                   // double(std::max(numberInliers, bestNumber)) * 100;
 
         // set the score for this primitive 
         this->setScore(score) ;
@@ -29,15 +28,10 @@ namespace acq {
         double thisArea = M_PI*4.0*pow(_radius, 2.0) ;
         Eigen::Matrix<double, 1,3> varianceVector = variance.diagonal() ; 
     
-std::cout << "varianceVector : "<< varianceVector << std::endl ;
-
         double meanVariance = varianceVector.norm() ;
-
-std::cout << "mean Variance : "<< meanVariance << std::endl ;
-
         double areaAroundPoint = M_PI*pow(meanVariance/4.7, 2.0) ;
 
-        std::cout << "small area : "<< areaAroundPoint << std::endl ;
+        //double areaAroundPoint = M_PI*pow(meanVariance, 2.0) ;
 
         int numberPoints = floor(thisArea/areaAroundPoint) ;
 
@@ -59,15 +53,14 @@ std::cout << "mean Variance : "<< meanVariance << std::endl ;
 
             // compute the estimated normal and radius for this point  
             thisRadius = (thisVertice - _center).norm() ;
-            estimatedNormal = thisVertice - _center ;
-            estimatedNormal = estimatedNormal.normalized() ;
+            estimatedNormal = (thisVertice - _center).normalized() ;
 
             // test between the distance and the radius  
             test1 = thisRadius - _radius ;
             test2 = estimatedNormal.dot(thisNormal) ;
 
             if (std::abs(test1) < threshold ) {
-                if ( test2 > alpha ) {
+                if ( std::abs(test2) > alpha ) {
                     // if the 2 test are true, the point is an inlier 
                     inliers_idx(index_inliers,0) = i ;
                     index_inliers += 1 ; 
