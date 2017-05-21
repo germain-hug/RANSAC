@@ -27,12 +27,12 @@ Eigen::MatrixXi sample(int cloudSize) {
 
 // Return the variance of the point cloud 
 Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
-    // compute the matrix minus the min of each coordinate
-    Eigen::MatrixXd centered = V.rowwise() - V.colwise().mean();
+       // Compute the matrix minus the min of each coordinate
+        Eigen::MatrixXd centered = V.rowwise() - V.colwise().mean();
 
-    // compute the covariance matrix 
-    Eigen::Matrix3d cov = (centered.transpose() * centered) / double(V.rows());
-    return cov ;
+        // Compute the covariance matrix
+        Eigen::Matrix3d cov = (centered.adjoint() * centered) / double(V.rows());
+        return cov ;
 }
 
 //  ****** ============ Functions to handle a sphere =============== ******* 
@@ -144,6 +144,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                       CloudPrimitive &primitives,
                       double thresh, double alpha) {        
         Eigen::MatrixXd V = cloud.getVertices(), N = cloud.getNormals();
+
         const int cloudSize = V.rows();
         const int nSamples = sample_idx.rows();
 
@@ -174,10 +175,8 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         Eigen::Matrix<double, 1,3> planeNormal = computeNormal(V, N.row(0));
         bool isPlane = true;
         for (int i = 0; i < N.rows(); i++) {
-            //std::cout << " dot N "  << std::abs(N.row(i).dot(planeNormal)) << std::endl;
             if (std::abs(N.row(i).dot(planeNormal)) < alpha) isPlane = false;
         }
-        //std::cout << " isplane "  << isPlane << std::endl;
         return isPlane;
     }
 
@@ -193,7 +192,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         }
 
         // Check for normal orientation
-        if (_N.dot(N) < 0) N = -N;
+        //if (_N.dot(N) < 0) N = -N;
         // Normalize
         if(N(0,0)!=0 && N(0,1)!=0 && N(0,2)!=0) N = N.normalized();
         return N;

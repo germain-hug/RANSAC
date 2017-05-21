@@ -37,7 +37,8 @@ namespace acq {
         virtual Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha){};
         virtual void computeScore(Eigen::Matrix3d variance, DecoratedCloud& pointCloud, double threshold, double alpha){};
         virtual int findBestNumberPoints(Eigen::Matrix3d variance){};
-    
+        virtual double findInliersBoundingBox(){};
+
     protected:
         double _score; 
         int _type; // 1: Sphere, 2: Plane
@@ -85,7 +86,7 @@ namespace acq {
 
         void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double T, double alpha);
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double T, double alpha);
-        int findBestNumberPoints(Eigen::Matrix3d var, DecoratedCloud& cloud,Eigen::MatrixXi inliers_idx);
+        double findInliersBoundingBox(Eigen::Matrix3d var, DecoratedCloud& cloud,Eigen::MatrixXi inliers_idx);
 
     private:
         Eigen::Matrix<double, 1,3> _refPoint;

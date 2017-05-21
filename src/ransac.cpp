@@ -29,7 +29,7 @@ namespace acq {
 
                     // test for the primitive, if they exist : add them in the cloud primitive 
                     computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
-                    //computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
+                    computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
                 }
 
                 int test = i ;
@@ -58,16 +58,14 @@ namespace acq {
                             best_primitives.addPrimitive(prim_Storage) ;
 
                             cleanCloud(cloud, cloudManager, thisInliers) ;
-                            newSize = cloud.getVertices().rows() ;
+                            numberOfPoint = cloud.getVertices().rows() ;
                             primitiveFound = true ;
 
 std::cout << "the best score : " << best_score  << std::endl;
 std::cout << "number d'inliers : " << n_inliers  << std::endl;
 
                         }
-
                         allPrimitive.deletePrimitive(bestPrim_idx) ;
-
 
                     }
                     else {
@@ -75,7 +73,7 @@ std::cout << "number d'inliers : " << n_inliers  << std::endl;
                         allPrimitive.deletePrimitive(bestPrim_idx) ;
                     }
 
-                    if (newSize < 3) {
+                    if (numberOfPoint < 3) {
                         break ;
                     }
                 }
