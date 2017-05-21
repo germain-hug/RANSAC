@@ -77,4 +77,11 @@ namespace acq {
         }
         return inliers_idx ;
     }
+
+    Primitive* Sphere::clone(){
+        Primitive* thisSphere = new Sphere(this->getRadius(), this->getCenter()) ;
+        thisSphere->setType(1) ;
+        return thisSphere;
+    }
+
 }

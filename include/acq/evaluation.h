@@ -9,7 +9,11 @@ void computeBoundingBox(float &Xmax,float & Xmin,float & Ymax,float & Ymin,float
 
 // with 1 add noise on the vertices, with 2 add noise on the normals 
 Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) ;
-    }
+
+
+
+}
 
 #endif
 
+// do connected component 

@@ -41,10 +41,9 @@ namespace acq {
                 if (nbAllPrim>0) {
                     // get back the best primitive 
                     bestPrim_idx = allPrimitive.findBestScore() ;
-
                     Primitive* best_prim = allPrimitive.getPrimitive(bestPrim_idx) ;
 
-                    // test for the score 
+                    // test for the score
                     best_score = best_prim->getScore() ;
 
                     // store the results both in primitives and cloud
@@ -54,21 +53,14 @@ namespace acq {
 
                         if(n_inliers > 1) {
                             // copy the primitive to store and add it to the newCloud                           
-                            Primitive* prim_Storage = new Primitive(*best_prim) ; 
+                            Primitive* prim_Storage = best_prim->clone() ;
                             best_primitives.addPrimitive(prim_Storage) ;
 
                             cleanCloud(cloud, cloudManager, thisInliers) ;
                             newSize = cloud.getVertices().rows() ;
                             primitiveFound = true ;
-
-std::cout << "the best score : " << best_score  << std::endl;
-std::cout << "number d'inliers : " << n_inliers  << std::endl;
-
                         }
-
                         allPrimitive.deletePrimitive(bestPrim_idx) ;
-
-
                     }
                     else {
                         // if the primitive isn't good enough, not take into account
@@ -82,7 +74,7 @@ std::cout << "number d'inliers : " << n_inliers  << std::endl;
             }            
             // free the memory allocated with all the primitives not used 
             allPrimitive.clearAllPrimitives() ;
-std::cout << "i : " << i << std::endl ;
+std::cout << "size best prim  in RANSAC : " << best_primitives.getCloudSize() << std::endl ;
             // cloudManager and cloudPrimitive contains the result of the function
             return primitiveFound ; // Just return a bool
     };

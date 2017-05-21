@@ -90,7 +90,7 @@ void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
 
         // set the type 
         thisSphere->setType(1) ;
-        
+    
         // store it in the cloud primitive 
         primitives.addPrimitive(thisSphere) ;
     }
@@ -210,16 +210,22 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
               double T_norm, // Normals  Distance Threshold (Plane)
               double T_refPt // RefPoint Distance Threshold (Plane)
     ) {
-
-        std::vector<std::pair<int,int>> fuses;
-        const int n = best_primitives.getCloudSize();
-
+        // initialization 
+        int nbCloudInitial = clouds.getCloudSize();
+        Eigen::MatrixXi visited = Eigen::MatrixXi::Zero(1, nbCloudInitial) ; 
+        double d1,d2 ;
+        int current_label = 0 ;
         // === Consider every pair of primitive for merging ===
         Primitive* first_prim, *second_prim;
 
-        for(int i=0; i<n-1; i++){ // First Primitive
-            first_prim = best_primitives.getPrimitive(i);
-            for(int j=i+1; j<n; j++){ // Second Primitive
+        for(int i=0; i < nbCloudInitial; i++){ // First Primitive
+            if (visited(0,i) == 0) {
+                current_label = current_label+1 ;
+                visited(0,i) = current_label ;
+
+                first_prim = best_primitives.getPrimitive(i);
+
+                for(int j=i+1; j<nbCloudInitial; j++){ // Second Primitive
                 second_prim = best_primitives.getPrimitive(j);
 
                 // --- Both primitives have the same type ---
@@ -227,44 +233,82 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
                     // ---- They are both Spheres ---
                     if(first_prim->getType()==1){
-                        double d1 = (first_prim->getCenter() - second_prim->getCenter()).norm();
-                        double d2 = std::abs(first_prim->getRadius() - second_prim->getRadius());
+                        d1 = (static_cast<Sphere*>(first_prim)->getCenter() - static_cast<Sphere*>(second_prim)->getCenter()).norm();
+                        d2 = std::abs(static_cast<Sphere*>(first_prim)->getRadius() - static_cast<Sphere*>(second_prim)->getRadius());
+
                         if(d1 < T_cent && d2 < T_rad){
-                            fuses.push_back(std::make_pair(i,j));
+                            visited(0,j) = current_label ;                        
                         }
                     }// ---- They are both Planes ---
                     else{
-                        double d1 = std::abs((first_prim->getNormal().dot(second_prim->getNormal())));
-                        double d2 = std::abs((first_prim->getRefPoint() - second_prim->getRefPoint()).dot(first_prim->getNormal()));
+                        double d1 = std::abs((static_cast<Plane*>(first_prim)->getNormal().dot(static_cast<Plane*>(second_prim)->getNormal())));
+                        double d2 = std::abs((static_cast<Plane*>(first_prim)->getRefPoint() - static_cast<Plane*>(first_prim)->getRefPoint()).dot(static_cast<Sphere*>(second_prim)->getNormal()));
+                        
                         if(d1 < T_norm && d2 < T_refPt){
-                            fuses.push_back(std::make_pair(i,j));
+                            visited(0,j) = current_label ;                        
                         }
                     }
                 }
             }
+            }
         }
 
+        std::cout << "number of distinct mesh :  " << current_label << std::endl ;
+        std::cout << "visited : " << visited << std::endl ;
+        // need to fuse the meshes 
+
+        int numberOfVertices = 0 ; 
         // === Merge all the primitives in the cloudManager ===
-        for(int i=0; i<fuses.size(); i++){
+        for(int thisLabel=1; thisLabel<=current_label; thisLabel++) {
 
-            int pr_1 = fuses.at(i).first;
-            int pr_2 = fuses.at(i).second;
+            // determine the size of the new vertices 
+            for(int j=0; j< nbCloudInitial; j++) {
+                if (visited(0,j) == thisLabel) { 
+                    std::cout << "for number j : " << numberOfVertices << std::endl ;
+                    numberOfVertices += clouds.getCloud(j).getVertices().rows() ;
+                }
+            }
 
-            // Merge both primitives
-            Eigen::MatrixXd V1 = clouds.getCloud(pr_1).getVertices();
-            Eigen::MatrixXd V2 = clouds.getCloud(pr_2).getVertices();
-            Eigen::MatrixXd N1 = clouds.getCloud(pr_1).getNormals();
-            Eigen::MatrixXd N2 = clouds.getCloud(pr_2).getNormals();
-            V1 << V1, V2;
-            N1 << N1, N2;
+            // create the new matrices 
+            Eigen::MatrixXd V(numberOfVertices, 3) ;
+            Eigen::MatrixXd N(numberOfVertices, 3) ;
+            Eigen::MatrixXd C(numberOfVertices,3) ;
 
-            // Update corresponding Meshes
-            clouds.getCloud(pr_1).setVertices(V1);
-            clouds.getCloud(pr_1).setNormals(N1);
+            int indiceStart = 0 ;
+            int nbVertCloud = 0;
+
+            for(int j=0; j< nbCloudInitial; j++){
+                if (visited(0,j) == thisLabel) { 
+                // number of vertex for this cloud 
+                nbVertCloud = clouds.getCloud(j).getVertices().rows() ;
+
+                // fill each block 
+                V.block(indiceStart,0,nbVertCloud,3) = clouds.getCloud(j).getVertices();
+
+                N.block(indiceStart,0,nbVertCloud,3) = clouds.getCloud(j).getNormals();
+
+                C.block(indiceStart,0,nbVertCloud,3) = Eigen::RowVector3d(std::rand()/double(RAND_MAX),
+                                       std::rand()/double(RAND_MAX),
+                                       std::rand()/double(RAND_MAX)).replicate(
+                    clouds.getCloud(j).getVertices().rows(), 1);
+
+                // update the indice to start filling 
+                indiceStart += nbVertCloud  ;
+                }
+            }
+            clouds.setCloud(DecoratedCloud(V,N,C), thisLabel-1) ;
+            numberOfVertices = 0; 
         }
-        for(int i=0; i<fuses.size(); i++) { // Delete redundant clouds
-            clouds.deleteCloud(fuses.at(i).second);
+
+        std::cout << " deleating clouds already merged, cloud size :  " << clouds.getCloudSize() << std::endl ;
+    
+        for(int j= current_label+1 ; j<nbCloudInitial; j++) {
+            std::cout << "j index : " << j << std::endl ; 
+            clouds.deleteCloud(j);
         }
+
+        std::cout << " after deleting clouds, size : " << clouds.getCloudSize() << std::endl ;
+
     }
 
     // take a cloudManager and gather all the cloud in one 
@@ -350,7 +394,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             cloudRansac.setNormals(N_in.topRows(inliers_valid-1));
         }
 //        std::cout << "Exit Clean Cloud" << std::endl;
-//        std::cout << "test size cloud Manager : " << cloudManager.getCloudSize() << std::endl ;
+//        std::cout v<< "test size cloud Manager : " << cloudManager.getCloudSize() << std::endl ;
 //        std::cout << "test size cloud : " << cloudRansac.getVertices().rows() << std::endl ;
 
     }

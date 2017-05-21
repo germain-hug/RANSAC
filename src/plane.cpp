@@ -130,4 +130,10 @@ namespace acq {
 
         return inliers_idx ;
     }
+
+    Primitive* Plane::clone(){
+        Primitive* thisPlane = new Plane(this->getRefPoint(), this->getNormal()) ;
+        thisPlane->setType(2) ;
+        return thisPlane;
+    }
 }

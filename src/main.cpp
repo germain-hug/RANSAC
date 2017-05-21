@@ -72,10 +72,10 @@ int main(int argc, char *argv[]) {
     float maxNeighbourDist = 0.15; //TODO: set to average vertex distance upon read
 
     // ********* VARIABLES FOR THE ALGORITHM  ********* 
-    int nbIteration = 300 ; 
-    int samplePerIt = 10 ;
-    double thresh = 0.1 ;
-    double alpha = 0.9 ;
+    int nbIteration = 10000 ; 
+    int samplePerIt = 50 ;
+    double thresh = 0.001 ;
+    double alpha = 0.999 ;
     double thresh_best = 80.0 ;
     float noise = 0.6 ;
     int numberOfOldMesh = 2 ;
@@ -335,10 +335,12 @@ int main(int argc, char *argv[]) {
           viewer.ngui->addButton("Primitive fusion",
                                [&]() {
             // ******** find values for the threshold *******$
-            double T_rad = 0.02 ;
-            double T_cent = 0.02 ;
+            double T_rad = 0.01 ;
+            double T_cent = 0.01 ;
             double T_norm = 0.02 ;
             double T_refPt = 0.02 ;
+
+            std::cout << "in fuse main : " <<best_primitives.getCloudSize() << std::endl ;
 
             // fuse the similar primitive in cloud manager 
             fuse(best_primitives, cloudManagerParts, T_rad, T_cent, T_norm, T_refPt) ;
@@ -349,12 +351,8 @@ int main(int argc, char *argv[]) {
             viewer.data.clear() ;
 
             // Show mesh
-            viewer.data.set_mesh(
-                             newCloud->getVertices(),
-                             newCloud->getFaces()
-            );
-
-             viewer.data.set_colors(newCloud->getColors());
+            viewer.data.set_points(newCloud->getVertices(), newCloud->getColors()) ;
+            viewer.core.show_overlay = true;
 
         });       
 

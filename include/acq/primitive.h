@@ -18,6 +18,24 @@ namespace acq {
     public:
         // constructor/destructor
         Primitive() {} ;
+
+/*Primitive(Primitive* primitiveToCopy) {
+    // copy the attribut of primitives 
+    _score = primitiveToCopy->getScore() ;
+    _type = primitiveToCopy->getType() ;
+    _inliers_idx = primitiveToCopy->getInliers_idx() ;
+
+    // copy the right attribut with respect to the type 
+    if (primitiveToCopy->getType() == 1) {
+        _radius = primitiveToCopy->getRadius() ;
+        _center = primitiveToCopy->getRadius() ;
+    }
+    else if (primitiveToCopy->getType() == 2) {
+        _refPoint = primitiveToCopy->getRefPoint() ;
+        _normal = primitiveToCopy->getNormal() ;
+    }
+}*/
+
         virtual ~Primitive() {} ;
 
         // getters.setters 
@@ -37,7 +55,9 @@ namespace acq {
         virtual Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha){};
         virtual void computeScore(Eigen::Matrix3d variance, DecoratedCloud& pointCloud, double threshold, double alpha){};
         virtual int findBestNumberPoints(Eigen::Matrix3d variance){};
-    
+        
+        virtual Primitive* clone(){};
+
     protected:
         double _score; 
         int _type; // 1: Sphere, 2: Plane
@@ -61,8 +81,9 @@ namespace acq {
         void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double threshold, double alpha);
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
         int findBestNumberPoints(Eigen::Matrix3d variance) ;
+        Primitive* clone() ;
 
-    private:
+    protected:
         // radius and center of the sphere 
         double _radius;
         Eigen::Matrix<double, 1,3> _center;
@@ -86,8 +107,9 @@ namespace acq {
         void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double T, double alpha);
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double T, double alpha);
         int findBestNumberPoints(Eigen::Matrix3d var, DecoratedCloud& cloud,Eigen::MatrixXi inliers_idx);
+        Primitive* clone() ;
 
-    private:
+    protected:
         Eigen::Matrix<double, 1,3> _refPoint;
         Eigen::Matrix<double, 1,3> _normal;
     };

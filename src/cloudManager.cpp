@@ -44,7 +44,7 @@ namespace acq {
 
 
     void CloudManager::deleteCloud(int index) {
-        _clouds.erase(_clouds.begin() + index);
+        _clouds.erase(_clouds.begin() + index-1);
     }
 
     void CloudManager::clearCloud() {
