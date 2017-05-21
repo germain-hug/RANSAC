@@ -55,8 +55,12 @@ namespace acq {
         virtual Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha){};
         virtual void computeScore(Eigen::Matrix3d variance, DecoratedCloud& pointCloud, double threshold, double alpha){};
         virtual int findBestNumberPoints(Eigen::Matrix3d variance){};
+<<<<<<< HEAD
         
         virtual Primitive* clone(){};
+=======
+        virtual double findInliersBoundingBox(){};
+>>>>>>> 1d0d85a51133ba0d48f61badc370428fffa3bb88
 
     protected:
         double _score; 
@@ -108,6 +112,7 @@ namespace acq {
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double T, double alpha);
         int findBestNumberPoints(Eigen::Matrix3d var, DecoratedCloud& cloud,Eigen::MatrixXi inliers_idx);
         Primitive* clone() ;
+        double findInliersBoundingBox(Eigen::Matrix3d var, DecoratedCloud& cloud,Eigen::MatrixXi inliers_idx);
 
     protected:
         Eigen::Matrix<double, 1,3> _refPoint;

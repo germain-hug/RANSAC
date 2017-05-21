@@ -78,18 +78,18 @@ int main(int argc, char *argv[]) {
     double alpha = 0.999 ;
     double thresh_best = 80.0 ;
     float noise = 0.6 ;
-    int numberOfOldMesh = 2 ;
+    int numberOfOldMesh = 3 ;
 
     // will store the current primitives and the point cloud per primitives
     acq::CloudPrimitive best_primitives ;
     acq::CloudManager cloudManagerParts ;
 
     // deals with several meshes 
-    enum MeshType { mesh1=0, mesh2} typeMesh = mesh1 ;
+    enum MeshType { mesh1=0, mesh2, mesh3} typeMesh = mesh1 ;
     //************************************
     
     // Load a mesh in OFF format
-    std::string meshPath1 = "../models/sphere_cube.off";
+    std::string meshPath1 = "../models/scene_2.off";
     if (argc > 1) {
         meshPath1 = std::string(argv[1]);
         if (meshPath1.find(".obj") == std::string::npos) {
@@ -101,6 +101,17 @@ int main(int argc, char *argv[]) {
     }
 
     std::string meshPath2 = "../models/scene.off";
+    if (argc > 1) {
+        meshPath2 = std::string(argv[1]);
+        if (meshPath2.find(".obj") == std::string::npos) {
+            std::cerr << "Only ready for  OBJ files for now...\n";
+            return EXIT_FAILURE;
+        }
+    } else {
+        std::cout << "Usage: iglFrameWork <path-to-off-mesh.obj>." << "\n";
+    }
+
+    std::string meshPath3 = "../models/planes.off";
     if (argc > 1) {
         meshPath2 = std::string(argv[1]);
         if (meshPath2.find(".obj") == std::string::npos) {
@@ -153,9 +164,28 @@ int main(int argc, char *argv[]) {
         Eigen::MatrixXd max_col2 = V2.colwise().maxCoeff();
         V2 /= std::max(max_row2.maxCoeff(), max_col2.maxCoeff());
 
+        // == ******** For the third mesh ******* ==
+
+        Eigen::MatrixXd V3;
+        Eigen::MatrixXi F3;
+        igl::readOFF(meshPath3, V3, F3);
+
+        if (V3.rows() <= 0) {
+            std::cerr << "Could not read mesh at " << meshPath3
+                      << "...exiting...\n";
+            return EXIT_FAILURE;
+        }
+
+        // ----- Normalize Vertices -----
+        Eigen::MatrixXd max_row3 = V3.rowwise().maxCoeff();
+        Eigen::MatrixXd max_col3 = V3.colwise().maxCoeff();
+        V3 /= std::max(max_row3.maxCoeff(), max_col3.maxCoeff());
+
+
         for (int i=0; i<2; i++) {
             cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V, F));
             cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V2, F2));
+            cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V3, F3));
         }
 
         // Store read vertices and faces
@@ -195,7 +225,7 @@ int main(int argc, char *argv[]) {
         viewer.ngui->addGroup("Choose your mesh");
 
         viewer.ngui->addVariable<MeshType>("Which mesh do you want ?",typeMesh)->setItems(
-            {"Sphere & Cube","Scene"}
+            {"Sphere & Cube","Scene", "Planes"}
         );
 
         viewer.ngui->addButton("Show the original mesh",

@@ -29,7 +29,7 @@ namespace acq {
 
                     // test for the primitive, if they exist : add them in the cloud primitive 
                     computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
-                    //computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
+                    computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
                 }
 
                 int test = i ;
@@ -57,7 +57,7 @@ namespace acq {
                             best_primitives.addPrimitive(prim_Storage) ;
 
                             cleanCloud(cloud, cloudManager, thisInliers) ;
-                            newSize = cloud.getVertices().rows() ;
+                            numberOfPoint = cloud.getVertices().rows() ;
                             primitiveFound = true ;
                         }
                         allPrimitive.deletePrimitive(bestPrim_idx) ;
@@ -67,14 +67,14 @@ namespace acq {
                         allPrimitive.deletePrimitive(bestPrim_idx) ;
                     }
 
-                    if (newSize < 3) {
+                    if (numberOfPoint < 3) {
                         break ;
                     }
                 }
             }            
             // free the memory allocated with all the primitives not used 
             allPrimitive.clearAllPrimitives() ;
-std::cout << "size best prim  in RANSAC : " << best_primitives.getCloudSize() << std::endl ;
+            std::cout << "size best prim  in RANSAC : " << best_primitives.getCloudSize() << std::endl ;
             // cloudManager and cloudPrimitive contains the result of the function
             return primitiveFound ; // Just return a bool
     };
