@@ -19,23 +19,6 @@ namespace acq {
         // constructor/destructor
         Primitive() {} ;
 
-/*Primitive(Primitive* primitiveToCopy) {
-    // copy the attribut of primitives 
-    _score = primitiveToCopy->getScore() ;
-    _type = primitiveToCopy->getType() ;
-    _inliers_idx = primitiveToCopy->getInliers_idx() ;
-
-    // copy the right attribut with respect to the type 
-    if (primitiveToCopy->getType() == 1) {
-        _radius = primitiveToCopy->getRadius() ;
-        _center = primitiveToCopy->getRadius() ;
-    }
-    else if (primitiveToCopy->getType() == 2) {
-        _refPoint = primitiveToCopy->getRefPoint() ;
-        _normal = primitiveToCopy->getNormal() ;
-    }
-}*/
-
         virtual ~Primitive() {} ;
 
         // getters.setters 
@@ -54,13 +37,9 @@ namespace acq {
         virtual Eigen::Matrix<double, 1,3> getRefPoint(){};
         virtual Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha){};
         virtual void computeScore(Eigen::Matrix3d variance, DecoratedCloud& pointCloud, double threshold, double alpha){};
-        virtual int findBestNumberPoints(Eigen::Matrix3d variance){};
-<<<<<<< HEAD
-        
+        virtual int findBestNumberPoints(Eigen::Matrix3d variance){};        
         virtual Primitive* clone(){};
-=======
         virtual double findInliersBoundingBox(){};
->>>>>>> 1d0d85a51133ba0d48f61badc370428fffa3bb88
 
     protected:
         double _score; 

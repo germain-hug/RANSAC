@@ -14,10 +14,18 @@ namespace acq {
         // compute the score 
         int numberInliers = inliers_idx.rows() ;
 
-        double score = (double(numberInliers)/double(bestNumber))*100.0 ;
+            // --- Compute the plane score ---
+            double density_max = 100, score = 0;
+            int inliers_min = 40;
+            const int n = inliers_idx.rows();
 
-        //double score = 100.0 - double(std::abs(numberInliers - bestNumber)) /
-                                   // double(std::max(numberInliers, bestNumber)) * 100;
+            if(n > inliers_min){
+                score = 80 + 0.2*(100.0 - (std::abs(density_max - n)) /
+                                double(std::max(density_max, double(n))) * 100.0);
+                //std::cout << " inliers_idx.rows(): " << inliers_idx.rows() << " Score set : " << score << std::endl;
+            }
+
+        //double score = (double(numberInliers)/double(bestNumber))*100.0 ;
 
         // set the score for this primitive 
         this->setScore(score) ;

@@ -48,6 +48,12 @@ namespace acq {
 
                     // store the results both in primitives and cloud
                     if (best_score > thresh_best) {
+                        if (best_prim->getType() == 1) {
+                            std::cout << "score sphere : " << best_score << std::endl ;
+                        }
+                        else
+                            std::cout << "score plane : " << best_score << std::endl ;
+
                         thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;                     
                         n_inliers = thisInliers.rows();
 

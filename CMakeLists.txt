@@ -129,6 +129,11 @@ set(SOURCE_FILES
 		include/acq/impl/cloudManager.hpp
     	include/acq/decoratedCloud.h
     	include/acq/impl/decoratedCloud.hpp
+
+		include/ANN/ANN.h  
+		include/ANN/ANNperf.h  
+		include/ANN/ANNx.h 
+
 		src/gestion.cpp
 		src/evaluation.cpp 
 		src/ransac.cpp
@@ -139,6 +144,30 @@ set(SOURCE_FILES
     src/decoratedCloud.cpp
     src/cloudManager.cpp
     src/main.cpp
+
+	src/ANNsrc/bd_tree.h
+	src/ANNsrc/kd_tree.h
+	src/ANNsrc/kd_split.h
+	src/ANNsrc/kd_search.h 
+	src/ANNsrc/kd_pr_search.h
+	src/ANNsrc/kd_util.h
+	src/ANNsrc/kd_fix_rad_search.h
+	src/ANNsrc/pr_queue.h
+	src/ANNsrc/pr_queue_k.h
+	src/ANNsrc/ANN.cpp	
+	src/ANNsrc/bd_fix_rad_search.cpp
+	src/ANNsrc/bd_pr_search.cpp
+	src/ANNsrc/bd_search.cpp
+	src/ANNsrc/bd_tree.cpp
+	src/ANNsrc/brute.cpp
+	src/ANNsrc/kd_dump.cpp
+	src/ANNsrc/kd_tree.cpp
+	src/ANNsrc/kd_split.cpp
+	src/ANNsrc/kd_search.cpp
+	src/ANNsrc/kd_pr_search.cpp
+	src/ANNsrc/kd_util.cpp
+	src/ANNsrc/kd_fix_rad_search.cpp
+	src/ANNsrc/perf.cpp
 )
 
 # Create program

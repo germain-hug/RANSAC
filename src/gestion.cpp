@@ -251,9 +251,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             }
             }
         }
-
-        std::cout << "number of distinct mesh :  " << current_label << std::endl ;
-        std::cout << "visited : " << visited << std::endl ;
         // need to fuse the meshes 
 
         int numberOfVertices = 0 ; 
@@ -263,7 +260,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             // determine the size of the new vertices 
             for(int j=0; j< nbCloudInitial; j++) {
                 if (visited(0,j) == thisLabel) { 
-                    std::cout << "for number j : " << numberOfVertices << std::endl ;
                     numberOfVertices += clouds.getCloud(j).getVertices().rows() ;
                 }
             }
@@ -297,17 +293,9 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             }
             clouds.setCloud(DecoratedCloud(V,N,C), thisLabel-1) ;
             numberOfVertices = 0; 
-        }
-
-        std::cout << " deleating clouds already merged, cloud size :  " << clouds.getCloudSize() << std::endl ;
-    
-        for(int j= current_label+1 ; j<nbCloudInitial; j++) {
-            std::cout << "j index : " << j << std::endl ; 
-            clouds.deleteCloud(j);
-        }
-
-        std::cout << " after deleting clouds, size : " << clouds.getCloudSize() << std::endl ;
-
+        }    
+        
+        clouds.deleteCloudFromIndex(current_label+1) ; 
     }
 
     // take a cloudManager and gather all the cloud in one 

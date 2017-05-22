@@ -33,6 +33,9 @@ public:
     // get cloud size 
     int getCloudSize(){return _clouds.size();};
 
+    void deleteCloudFromIndex(int indexStart);
+
+
 protected:
     std::vector<DecoratedCloud> _clouds; //!< List of clouds possibly with normals and faces.
 

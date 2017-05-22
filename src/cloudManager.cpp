@@ -47,6 +47,14 @@ namespace acq {
         _clouds.erase(_clouds.begin() + index-1);
     }
 
+    void CloudManager::deleteCloudFromIndex(int indexStart) {
+        std::vector<DecoratedCloud>::iterator thisCloudIt;
+        
+        for ( thisCloudIt = _clouds.begin()+indexStart; thisCloudIt != _clouds.end(); ) {
+            thisCloudIt = _clouds.erase(thisCloudIt);
+        }    
+    }
+
     void CloudManager::clearCloud() {
         std::vector<DecoratedCloud>::iterator thisCloudIt;
         for ( thisCloudIt = _clouds.begin(); thisCloudIt != _clouds.end(); ) {

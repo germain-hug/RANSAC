@@ -365,10 +365,10 @@ int main(int argc, char *argv[]) {
           viewer.ngui->addButton("Primitive fusion",
                                [&]() {
             // ******** find values for the threshold *******$
-            double T_rad = 0.01 ;
-            double T_cent = 0.01 ;
-            double T_norm = 0.02 ;
-            double T_refPt = 0.02 ;
+            double T_rad = 0.001 ;
+            double T_cent = 0.001 ;
+            double T_norm = 0.001 ;
+            double T_refPt = 0.001 ;
 
             std::cout << "in fuse main : " <<best_primitives.getCloudSize() << std::endl ;
 
