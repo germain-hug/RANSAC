@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Usage: iglFrameWork <path-to-off-mesh.obj>." << "\n";
     }
 
-    std::string meshPath3 = "../models/planes.off";
+    std::string meshPath3 = "../models/cube_damaged.off";
     if (argc > 1) {
         meshPath2 = std::string(argv[1]);
         if (meshPath2.find(".obj") == std::string::npos) {

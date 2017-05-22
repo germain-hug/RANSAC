@@ -209,6 +209,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
               double T_norm, // Normals  Distance Threshold (Plane)
               double T_refPt // RefPoint Distance Threshold (Plane)
     ) {
+
         // initialization 
         int nbCloudInitial = clouds.getCloudSize();
         Eigen::MatrixXi visited = Eigen::MatrixXi::Zero(1, nbCloudInitial) ; 
@@ -241,17 +242,18 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                     }// ---- They are both Planes ---
                     else{
                         double d1 = std::abs((static_cast<Plane*>(first_prim)->getNormal().dot(static_cast<Plane*>(second_prim)->getNormal())));
-                        double d2 = std::abs((static_cast<Plane*>(first_prim)->getRefPoint() - static_cast<Plane*>(second_prim)->getRefPoint()).dot(static_cast<Sphere*>(second_prim)->getNormal()));
-                        
-                        if(d1 > T_norm && d2 < T_refPt){
-                            visited(0,j) = current_label ;                        
+                        double d2 = std::abs((static_cast<Plane*>(first_prim)->getRefPoint() - static_cast<Plane*>(second_prim)->getRefPoint()).dot(static_cast<Plane*>(second_prim)->getNormal()));
+                        double d3 = std::abs((static_cast<Plane*>(first_prim)->getRefPoint() - static_cast<Plane*>(second_prim)->getRefPoint()).dot(static_cast<Plane*>(first_prim)->getNormal()));
+
+                        if(d1 > T_norm && (d2 < T_refPt || d3 < T_refPt)){
+                            visited(0,j) = current_label ;
                         }
                     }
                 }
             }
             }
         }
-        // need to fuse the meshes 
+        // need to fuse the meshes
 
         int numberOfVertices = 0 ; 
         // === Merge all the primitives in the cloudManager ===
@@ -293,10 +295,13 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             }
             clouds.setCloud(DecoratedCloud(V,N,C), thisLabel-1) ;
             numberOfVertices = 0; 
-        }    
-        
-        clouds.deleteCloudFromIndex(current_label+1) ; 
+        }
+        if(clouds.getCloudSize() - current_label > 0) {
+            clouds.deleteCloudFromIndex(current_label+1);
+        }
+
     }
+
 
     // take a cloudManager and gather all the cloud in one 
     DecoratedCloud* gatherClouds(CloudManager& cloudManager) {

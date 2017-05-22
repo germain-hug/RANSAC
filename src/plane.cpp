@@ -15,12 +15,11 @@ namespace acq {
             //double inliersDensity = inliers_idx.rows()/this->findInliersBoundingBox(var, cloud, inliers_idx);
 
             // --- Compute the plane score ---
-            double density_max = 130, score = 0;
+            double density_max = 130, score = 0.0;
             int inliers_min = 30;
             const int n = inliers_idx.rows();
-
             if(n > inliers_min){
-                score = 80 + 0.2*(100.0 - (std::abs(density_max - n)) /
+                score = 80.0 + 0.2*(100.0 - (std::abs(density_max - n)) /
                                 double(std::max(density_max, double(n))) * 100.0);
             }
 
