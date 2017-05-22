@@ -367,7 +367,7 @@ int main(int argc, char *argv[]) {
             // ******** find values for the threshold *******$
             double T_rad = 0.001 ;
             double T_cent = 0.001 ;
-            double T_norm = 0.001 ;
+            double T_norm = 0.98 ;
             double T_refPt = 0.001 ;
 
             std::cout << "in fuse main : " <<best_primitives.getCloudSize() << std::endl ;

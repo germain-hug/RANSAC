@@ -16,20 +16,17 @@ namespace acq {
 
             // --- Compute the plane score ---
             double density_max = 130, score = 0;
-            int inliers_min = 40;
+            int inliers_min = 30;
             const int n = inliers_idx.rows();
 
             if(n > inliers_min){
                 score = 80 + 0.2*(100.0 - (std::abs(density_max - n)) /
                                 double(std::max(density_max, double(n))) * 100.0);
-                //std::cout << " inliers_idx.rows(): " << inliers_idx.rows() << " Score set : " << score << std::endl;
             }
 
             // --- Set the score for this primitive ---
             this->setScore(score);
 
-        } else {
-           // std::cout << "No Inliers found for this primitive" << std::endl;
         }
     }
 
@@ -97,24 +94,18 @@ namespace acq {
             for (int i = 0; i < n; i++) {
                 _V = cloud.getVertices().row(i);
                 _N = cloud.getNormals().row(i).normalized();
-
                 if(_N.dot(N) < 0) _N = -_N;
 
                 // --- Check if in range and if normals match ---
                 dist = std::abs((N.dot(_V - P)) / N.norm());
-              //  std::cout << " dist " << dist << " T " << T << " std::abs(_N.dot(N)) " << std::abs(_N.dot(N)) << std::endl;
                 if (dist < T && std::abs(_N.dot(N)) > alpha) {
                     inliers_idx(idx_counter, 0) = i;
                     idx_counter++;
                 }
             }
 
-            if (idx_counter == 0) {
-                inliers_idx = inliers_idx.topRows(1);
-            }
-            else {
-                inliers_idx = inliers_idx.topRows(idx_counter - 1) ;
-            }
+            if (idx_counter == 0) inliers_idx = inliers_idx.topRows(1);
+            else inliers_idx = inliers_idx.topRows(idx_counter - 1);
         }
 
         return inliers_idx ;

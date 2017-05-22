@@ -241,9 +241,9 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                     }// ---- They are both Planes ---
                     else{
                         double d1 = std::abs((static_cast<Plane*>(first_prim)->getNormal().dot(static_cast<Plane*>(second_prim)->getNormal())));
-                        double d2 = std::abs((static_cast<Plane*>(first_prim)->getRefPoint() - static_cast<Plane*>(first_prim)->getRefPoint()).dot(static_cast<Sphere*>(second_prim)->getNormal()));
+                        double d2 = std::abs((static_cast<Plane*>(first_prim)->getRefPoint() - static_cast<Plane*>(second_prim)->getRefPoint()).dot(static_cast<Sphere*>(second_prim)->getNormal()));
                         
-                        if(d1 < T_norm && d2 < T_refPt){
+                        if(d1 > T_norm && d2 < T_refPt){
                             visited(0,j) = current_label ;                        
                         }
                     }
@@ -373,16 +373,12 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                     outliers_valid++;
                 }
              }
-            // Eigen::MatrixXd N_out_top = N_out.block(0,0,inliers_valid-1,3);
             Eigen::MatrixXd N_out_top = N_out.topRows(outliers_valid-1);
 
             cloudManager.addCloud(DecoratedCloud(V_out.topRows(outliers_valid-1),N_out_top)); // Store cloud of inliers
             cloudRansac.setVertices(V_in.topRows(inliers_valid-1)); // Keep cloud deprived from inliers
             cloudRansac.setNormals(N_in.topRows(inliers_valid-1));
         }
-//        std::cout << "Exit Clean Cloud" << std::endl;
-//        std::cout v<< "test size cloud Manager : " << cloudManager.getCloudSize() << std::endl ;
-//        std::cout << "test size cloud : " << cloudRansac.getVertices().rows() << std::endl ;
 
     }
 }

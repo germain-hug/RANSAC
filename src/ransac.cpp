@@ -33,7 +33,6 @@ namespace acq {
                 }
 
                 int test = i ;
-               // std::cout << "iter : " << test  << std::endl;
 
                 nbAllPrim = allPrimitive.getCloudSize() ;
 
