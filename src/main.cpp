@@ -384,7 +384,25 @@ int main(int argc, char *argv[]) {
             viewer.data.set_points(newCloud->getVertices(), newCloud->getColors()) ;
             viewer.core.show_overlay = true;
 
-        });       
+        });     
+
+        viewer.ngui->addButton("Connected components",
+                               [&]() {
+        
+        std::cout << "enter in connected components" << std::endl ;
+
+        acq::DecoratedCloud thisCloud = cloudManagerOldMesh.getCloud(typeMesh) ;
+        double thres = 0.01 ;
+
+        connectedComponent(thisCloud, thres) ;
+
+        viewer.data.clear() ;
+
+        // Show mesh
+        viewer.data.set_points(thisCloud.getVertices(), thisCloud.getColors()) ;
+        viewer.core.show_overlay = true;
+
+        });  
 
         viewer.ngui->addGroup("Test noise");
        
