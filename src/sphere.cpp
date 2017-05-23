@@ -15,8 +15,8 @@ namespace acq {
         int numberInliers = inliers_idx.rows() ;
 
             // --- Compute the plane score ---
-            double density_max = 100, score = 0;
-            int inliers_min = 40;
+            double density_max = 35, score = 0;
+            int inliers_min = 20;
             const int n = inliers_idx.rows();
 
             if(n > inliers_min){

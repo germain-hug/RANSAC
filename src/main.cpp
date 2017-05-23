@@ -412,7 +412,11 @@ int main(int argc, char *argv[]) {
         viewer.ngui->addButton("Reconstruction", [&]() {
 
             int nbSample = 2000;
-            acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts, 1) ;
+            std::cout << "OKR " << std::endl;
+
+            acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts, 0) ;
+            std::cout << "OKT " << std::endl;
+
             acq::DecoratedCloud cloud = acq::DecoratedCloud(newCloud->getVertices(),newCloud->getNormals(),newCloud->getColors());
             reconstruct(best_primitives, cloud, nbSample, thresh, alpha);
 
