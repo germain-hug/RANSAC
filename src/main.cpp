@@ -402,7 +402,21 @@ int main(int argc, char *argv[]) {
         viewer.data.set_points(thisCloud.getVertices(), thisCloud.getColors()) ;
         viewer.core.show_overlay = true;
 
-        });  
+        });
+
+        /// ----- RECONSTRUCTION ----
+        viewer.ngui->addButton("Reconstruction", [&]() {
+
+            int nbSample = 2000;
+            acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts) ;
+            acq::DecoratedCloud cloud = acq::DecoratedCloud(newCloud->getVertices(),newCloud->getNormals(),newCloud->getColors());
+            reconstruct(best_primitives, cloud, nbSample, thresh, alpha);
+
+            // Show mesh
+            viewer.data.clear() ;
+            viewer.data.set_points(newCloud->getVertices(), newCloud->getColors()) ;
+            viewer.core.show_overlay = true;
+                               });
 
         viewer.ngui->addGroup("Test noise");
        
