@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
     double thresh_best = 80.0 ;
     float noise = 0.6 ;
     int numberOfOldMesh = 3 ;
-    double thresCC = 0.08 ;
+    double thresCC = 0.003 ;
 
     double T_rad = 0.01 ;
     double T_cent = 0.01 ;
@@ -398,14 +398,14 @@ int main(int argc, char *argv[]) {
             // ******** find values for the threshold *******$
 
             // fuse the similar primitive in cloud manager 
+            std::cout << "size best prim before : " << best_primitives.getCloudSize() << std::endl ;
+
             fuse(best_primitives, cloudManagerParts, T_rad, T_cent, T_norm, T_refPt) ;
+
+            std::cout << "size best prim after : " << best_primitives.getCloudSize() << std::endl ;
 
            // fuse the result in the new cloud with random color
             acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts,0) ;
-
-            for (int i=0 ; i< cloudManagerParts.getCloudSize(); i++) {
-                std::cout << "cloud number : " << i << " size : " << cloudManagerParts.getCloud(i).getVertices().rows() << std::endl ;
-            }
 
             // visualisation 
             viewer.data.clear() ;
@@ -424,8 +424,7 @@ int main(int argc, char *argv[]) {
 
         viewer.ngui->addButton("Connected components",
                                [&]() {
-        std::cout << "enter in connected components" << std::endl ;
-        connectedComponentManager(cloudManagerParts, thresCC) ;
+        connectedComponentManager(cloudManagerParts, best_primitives, thresCC) ;
 
         // fuse the result in the new cloud with the previous color computed in connected comp
         acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts,1);
@@ -435,7 +434,6 @@ int main(int argc, char *argv[]) {
         // Show mesh
         viewer.data.set_points(newCloud->getVertices(), newCloud->getColors()) ;
         viewer.core.show_overlay = true;
-
         });
 
         /// ----- RECONSTRUCTION ----

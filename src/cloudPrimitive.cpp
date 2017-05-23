@@ -71,6 +71,13 @@ void CloudPrimitive::clearAllPrimitives() {
     }
 }
 
+void CloudPrimitive::deleteCloudFromIndex(int indexStart) {
+        std::vector<Primitive*>::iterator thisPrimitiveIt;
+        
+        for ( thisPrimitiveIt = _primitives.begin()+indexStart; thisPrimitiveIt != _primitives.end(); ) {
+            thisPrimitiveIt = _primitives.erase(thisPrimitiveIt);
+        }    
+}
 
 
 } //...ns acq

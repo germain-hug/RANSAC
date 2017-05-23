@@ -51,11 +51,12 @@ int isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold
     // test for the radius
     double test1 = computerRadius(vertices.row(2), thisCenter) - estimatedRadius ;
     double test2 = estimatedNormal.dot(normals.row(2).normalized()) ;
+    double test3 = estimatedNormal.dot(-normals.row(2).normalized()) ;
 
     int thisReturn = 0 ;
 
     if (std::abs(test1) < threshold ) {
-        if ( test2 > alpha ) {
+        if ( test2 > alpha || test3 > alpha) {
             // if the 2 test are true, the 3 points form a sphere
             thisReturn = 1 ;
         }
@@ -214,7 +215,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         // initialization 
         int nbCloudInitial = clouds.getCloudSize();
         Eigen::MatrixXi visited = Eigen::MatrixXi::Zero(1, nbCloudInitial) ;
-        double d1,d2 ;
+        double d1,d2, d3 ;
         int current_label = 0 ;
         // === Consider every pair of primitive for merging ===
         Primitive* first_prim, *second_prim;
@@ -242,9 +243,9 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                         }
                     }// ---- They are both Planes ---
                     else{
-                        double d1 = std::abs((static_cast<Plane*>(first_prim)->getNormal().dot(static_cast<Plane*>(second_prim)->getNormal())));
-                        double d2 = std::abs((static_cast<Plane*>(first_prim)->getRefPoint() - static_cast<Plane*>(second_prim)->getRefPoint()).dot(static_cast<Plane*>(second_prim)->getNormal()));
-                        double d3 = std::abs((static_cast<Plane*>(first_prim)->getRefPoint() - static_cast<Plane*>(second_prim)->getRefPoint()).dot(static_cast<Plane*>(first_prim)->getNormal()));
+                        d1 = std::abs((static_cast<Plane*>(first_prim)->getNormal().dot(static_cast<Plane*>(second_prim)->getNormal())));
+                        d2 = std::abs((static_cast<Plane*>(first_prim)->getRefPoint() - static_cast<Plane*>(second_prim)->getRefPoint()).dot(static_cast<Plane*>(second_prim)->getNormal()));
+                        d3 = std::abs((static_cast<Plane*>(first_prim)->getRefPoint() - static_cast<Plane*>(second_prim)->getRefPoint()).dot(static_cast<Plane*>(first_prim)->getNormal()));
 
                         if(d1 > T_norm && (d2 < T_refPt || d3 < T_refPt)){
                             visited(0,j) = current_label ;
@@ -255,18 +256,20 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             }
         }
         // need to fuse the meshes
-
         int numberOfVertices = 0 ;
+        int thisType ;
+
         // === Merge all the primitives in the cloudManager ===
         for(int thisLabel=1; thisLabel<=current_label; thisLabel++) {
 
-            // determine the size of the new vertices 
+            // determine the size of the new vertices for this cloud
             for(int j=0; j< nbCloudInitial; j++) {
                 if (visited(0,j) == thisLabel) {
                     numberOfVertices += clouds.getCloud(j).getVertices().rows() ;
                 }
             }
 
+            // initialisation to fuse everything
             // create the new matrices 
             Eigen::MatrixXd V(numberOfVertices, 3) ;
             Eigen::MatrixXd N(numberOfVertices, 3) ;
@@ -277,6 +280,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
             for(int j=0; j< nbCloudInitial; j++){
                 if (visited(0,j) == thisLabel) {
+                // ****** FUSE THE CLOUDS ****** 
                 // number of vertex for this cloud
                 nbVertCloud = clouds.getCloud(j).getVertices().rows() ;
 
@@ -292,15 +296,37 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
                 // update the indice to start filling
                 indiceStart += nbVertCloud  ;
+
+                // ****** FUSE THE PRIMITIVES ****** 
+                if (best_primitives.getPrimitive(j)->getType() == 1) {
+                      thisType = 1 ;
+                }
+                if (best_primitives.getPrimitive(j)->getType() == 2) {
+                      thisType = 2 ;
+                }
                 }
             }
+            // set the new cloud 
             clouds.setCloud(DecoratedCloud(V,N,C), thisLabel-1) ;
             numberOfVertices = 0;
-        }
-        if(clouds.getCloudSize() - current_label > 0) {
-            clouds.deleteCloudFromIndex(current_label+1);
+
+            Primitive* newPrimitive = new Primitive() ;
+
+            // set the new primitive 
+            if (thisType == 1) {
+                newPrimitive->setType(1) ;
+            }
+            else if (thisType == 2) {
+                newPrimitive->setType(2) ;
+            }
+
+            best_primitives.setPrimitive(newPrimitive, thisLabel-1) ;
         }
 
+        if(clouds.getCloudSize() - current_label > 0) {
+            clouds.deleteCloudFromIndex(current_label+1);
+            best_primitives.deleteCloudFromIndex(current_label+1) ;
+        }
     }
 
 

@@ -55,11 +55,36 @@ Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) {
         return newMatrix ;
 }
 
-void connectedComponentManager(CloudManager& thisCloudManager, double threshold) {
+void connectedComponentManager(CloudManager& thisCloudManager, CloudPrimitive& best_primitives, double threshold) {
     int sizeCloud = thisCloudManager.getCloudSize() ;
+    int numberDelete = 0 ;
+    int thisType, nbVertices ;
 
     for (int i = 0; i< sizeCloud; i++) {
-        connectedComponent(thisCloudManager.getCloud(i), threshold) ;
+        thisType = best_primitives.getPrimitive(i-numberDelete)->getType() ;
+        nbVertices = thisCloudManager.getCloud(i-numberDelete).getVertices().rows() ;
+
+        // apply connected component if it's a plane 
+        if (nbVertices > 8 && thisType==2) { 
+            connectedComponent(thisCloudManager.getCloud(i-numberDelete), threshold) ;
+        }
+
+        // else if it's a plane, set the color
+        else if (nbVertices > 8 && thisType==1) {
+            Eigen::MatrixXd C(nbVertices,3) ;
+
+            C = Eigen::RowVector3d(std::rand()/double(RAND_MAX),
+                                   std::rand()/double(RAND_MAX),
+                                   std::rand()/double(RAND_MAX)).replicate(nbVertices, 1);
+            
+            thisCloudManager.getCloud(i-numberDelete).setColors(C) ;
+        }
+
+        // else the cloud is too small and we delete it 
+        else if (nbVertices < 8) {
+            thisCloudManager.deleteCloud(i-numberDelete) ;
+            numberDelete += 1 ;
+        }
     } 
 }
 
@@ -72,6 +97,7 @@ void connectedComponent(DecoratedCloud& cloud, double threshold) {
     visited = Eigen::MatrixXd::Zero(nbPoints, 1) ;
     Eigen::MatrixXd vertices(nbPoints,dim) ;
     vertices = cloud.getVertices() ;
+    int connectivity = 8 ; 
 
     Eigen::RowVector3d thisLabel = Eigen::RowVector3d(std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX),
@@ -89,7 +115,7 @@ void connectedComponent(DecoratedCloud& cloud, double threshold) {
 
     for (int i = 0 ; i < nbPoints; i++) {
         if (visited(i,0) == 0) {
-            labelVertices(thisLabel, verticesArray, colors, i, visited, kdTree, threshold) ;
+            labelVertices(thisLabel, verticesArray, colors, i, visited, kdTree, threshold, connectivity) ;
 
             // change the label 
             thisLabel = Eigen::RowVector3d(std::rand()/double(RAND_MAX),
@@ -105,7 +131,7 @@ void connectedComponent(DecoratedCloud& cloud, double threshold) {
 }
 
 void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Eigen::MatrixXd& colors, 
-                    int this_idx, Eigen::MatrixXd& visited, ANNkd_tree*	kdTree, double threshold) {
+                    int this_idx, Eigen::MatrixXd& visited, ANNkd_tree*	kdTree, double threshold, int connectivity) {
 
         // store the result for this vertices, visited and the color  
         visited(this_idx, 0) = 1 ; 
@@ -114,17 +140,17 @@ void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Ei
         // chose to selectione the closest 4 points 
         // allocate variable for the kdTree
         ANNidxArray	nnIdx;	
-        nnIdx = new ANNidx[4]; // the index 
+        nnIdx = new ANNidx[connectivity]; // the index 
 
 	    ANNdistArray dists;		
-	    dists = new ANNdist[4]; //the distance
+	    dists = new ANNdist[connectivity]; //the distance
         ANNpoint queryPt;
         queryPt = annAllocPt(3);
         queryPt = verticesArray[this_idx] ; // the point
 
         kdTree->annkSearch(				// search
 				queryPt,						// query point
-				4,								// number of near neighbors
+				connectivity,								// number of near neighbors
 				nnIdx,							// nearest neighbors (returned)
 				dists,							// distance (returned)
 				0.0);
@@ -133,17 +159,15 @@ void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Ei
         int indexFind ;
         double distance ;
 
-        for (int thisNeigh = 0; thisNeigh< 4; thisNeigh++) {
+        for (int thisNeigh = 0; thisNeigh< connectivity; thisNeigh++) {
             // take the result 
             indexFind =  nnIdx[thisNeigh] ;
             distance =  dists[thisNeigh] ;
 
             if (visited(indexFind, 0) == 0) {
                 if (distance < threshold) {
-                    labelVertices(thisColor, verticesArray, colors, indexFind,visited, kdTree, threshold) ; 
+                    labelVertices(thisColor, verticesArray, colors, indexFind,visited, kdTree, threshold, connectivity) ; 
                 }
-                else 
-                    std::cout << "distance : " << distance <<std::endl ;
             }
         }
 

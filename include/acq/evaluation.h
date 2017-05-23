@@ -2,6 +2,8 @@
 #define ACQ_EVALUATION_H
 
 #include "acq/cloudManager.h"
+#include "acq/cloudPrimitive.h"
+
 #include <ANN/ANN.h>					// ANN declarations
 
 namespace acq {
@@ -13,13 +15,12 @@ Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) ;
 
 
 // ***********************$ Function to perform connected component algorithm ******************
-
-void connectedComponentManager(CloudManager& thisCloudManager, double threshold) ;
+void connectedComponentManager(CloudManager& thisCloudManager, CloudPrimitive& best_primitives, double threshold) ;
 
 void connectedComponent(DecoratedCloud& cloud, double threshold) ;
 
 void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Eigen::MatrixXd& colors, 
-                    int this_idx, Eigen::MatrixXd& visited, ANNkd_tree*	kdTree, double threshold) ;
+                    int this_idx, Eigen::MatrixXd& visited, ANNkd_tree*	kdTree, double threshold, int connectivity) ;
 
 ANNpointArray matrixToANNArray(Eigen::MatrixXd const& points) ;
 

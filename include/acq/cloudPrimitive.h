@@ -32,6 +32,7 @@ namespace acq {
 
         void clearAllPrimitives() ;
 
+        void deleteCloudFromIndex(int indexStart) ;
     protected:
         std::vector<Primitive*> _primitives ;
 
