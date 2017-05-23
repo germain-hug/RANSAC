@@ -441,18 +441,17 @@ int main(int argc, char *argv[]) {
         /// ----- RECONSTRUCTION ----
         viewer.ngui->addButton("Reconstruction", [&]() {
 
-            int nbSample = 2000;
-            std::cout << "OKR " << std::endl;
+            int nbSample = 1000;
+            double T = 0.1;
 
             acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts, 0) ;
-            std::cout << "OKT " << std::endl;
-
             acq::DecoratedCloud cloud = acq::DecoratedCloud(newCloud->getVertices(),newCloud->getNormals(),newCloud->getColors());
-            reconstruct(best_primitives, cloud, nbSample, thresh, alpha);
+
+            reconstruct(best_primitives, cloud, nbSample, thresh, alpha, T);
 
             // Show mesh
             viewer.data.clear() ;
-            viewer.data.set_points(newCloud->getVertices(), newCloud->getColors()) ;
+            viewer.data.set_points(cloud.getVertices(), cloud.getColors()) ;
             viewer.core.show_overlay = true;
                                });
 
