@@ -34,6 +34,9 @@ namespace acq {
     void fuse(CloudPrimitive& best_primitives, CloudManager& clouds, double T_rad, double T_cent, double T_norm, double T_refPt);
     DecoratedCloud* gatherClouds(CloudManager& cloudManager,int colorExit) ;
     void cleanCloud(DecoratedCloud& cloudRansac, CloudManager& cloudManager, Eigen::MatrixXi inliers_idx) ;
+
+    void reconstruct(CloudPrimitive& best_primitives, DecoratedCloud& cloud, int nbSamples, double T, double alpha);
+    void sampleFromPrimitive(DecoratedCloud& cloud, Eigen::MatrixXi inliers_idx, Primitive p, int nbSamples);
 }
 
 #endif
