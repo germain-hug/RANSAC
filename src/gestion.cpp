@@ -493,8 +493,8 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                 Eigen::MatrixXd new_color(1,3); new_color << 1.0, 0.0, 0.0;
                 std::cout << "V.rows()" << V.rows() << std::endl;
 
-                V << V, new_vertex;
-                C << C, new_color;
+                V << V, new_vertex.row(0);
+                C << C, new_color.row(0);
                 std::cout << "V.rows()" << V.rows() << std::endl;
 
             }
