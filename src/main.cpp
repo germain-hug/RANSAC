@@ -376,7 +376,11 @@ int main(int argc, char *argv[]) {
 
            // fuse the result in the new cloud with random color
             acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts,0) ;
-            
+
+            for (int i=0 ; i< cloudManagerParts.getCloudSize(); i++) {
+                std::cout << "cloud number : " << i << " size : " << cloudManagerParts.getCloud(i).getVertices().rows() << std::endl ;
+            }
+
             // visualisation 
             viewer.data.clear() ;
 
