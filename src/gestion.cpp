@@ -431,6 +431,9 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         Eigen::MatrixXd v = u.row(0).cross(N.row(0));
         if(v.norm()!=0.0) v.normalize();
 
+        std::cout << " OK1 " << std::endl;
+
+
         // --- Retrieve 3D Inliers and project on (u,v) basis ---
         const int n = inliers_idx.rows();
         Eigen::MatrixXd inliers2D(n, 2);
@@ -450,6 +453,10 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         double y_min = inliers2D.col(1).minCoeff();
         double y_max = inliers2D.col(1).maxCoeff();
 
+
+
+        std::cout << " OK2 " << std::endl;
+
         // --- Generate new 2D samples in (u,v) coordinates ---
         srand(time(NULL));
         double this_x, this_y, f_x, f_y;
@@ -468,6 +475,8 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                     break;
                 }
             }
+            std::cout << " OK3 " << std::endl;
+
             // We found a valid sample, compute its world coordinates
             if (isValid) {
                 std::cout << "thix_x " <<  this_x << "  this_y " << this_y << std::endl;

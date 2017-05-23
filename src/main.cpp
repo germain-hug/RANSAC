@@ -369,7 +369,7 @@ int main(int argc, char *argv[]) {
             double T_rad = 0.01 ;
             double T_cent = 0.01 ;
             double T_norm = 0.98 ;
-            double T_refPt = 0.001 ;
+            double T_refPt = 0.01 ;
 
             // fuse the similar primitive in cloud manager 
             fuse(best_primitives, cloudManagerParts, T_rad, T_cent, T_norm, T_refPt) ;
@@ -412,7 +412,7 @@ int main(int argc, char *argv[]) {
         viewer.ngui->addButton("Reconstruction", [&]() {
 
             int nbSample = 2000;
-            acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts) ;
+            acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts, 1) ;
             acq::DecoratedCloud cloud = acq::DecoratedCloud(newCloud->getVertices(),newCloud->getNormals(),newCloud->getColors());
             reconstruct(best_primitives, cloud, nbSample, thresh, alpha);
 
