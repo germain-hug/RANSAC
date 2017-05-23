@@ -12,7 +12,7 @@ Eigen::MatrixXi sample(int cloudSize) {
     // add a random indices between 0 and sizeMatrix in a numberPoint sized vector
     for (int i=0; i<3; i++) {
         bool isUnique = false;
-        while(!isUnique){
+        while(!isUnique){ // we shouldn't use twice the same point 
             newIndex = rand() % (cloudSize + 1) ;
             isUnique = true;
             for(int j=0; j<i; j++) {
@@ -44,14 +44,14 @@ int isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold
     Eigen::Matrix<double, 1,3> thisCenter = computerCenter(vertices.topRows(2), normals.topRows(2)) ;
     double estimatedRadius = computerRadius(vertices.topRows(2), thisCenter) ;
 
-    // compute the estimated normal for the least point
+    // compute the estimated normal for the last point
     Eigen::Matrix<double, 1,3> estimatedNormal = vertices.row(2) - thisCenter ;
     estimatedNormal.normalize() ;
 
     // test for the radius
     double test1 = computerRadius(vertices.row(2), thisCenter) - estimatedRadius ;
     double test2 = estimatedNormal.dot(normals.row(2).normalized()) ;
-    double test3 = estimatedNormal.dot(-normals.row(2).normalized()) ;
+    double test3 = estimatedNormal.dot(-normals.row(2).normalized()) ; // in case where all the normals are inverted
 
     int thisReturn = 0 ;
 
@@ -65,7 +65,7 @@ int isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold
 }
 
 // if the 3 points create a sphere, we add it to the primitives 
-void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, CloudPrimitive& primitives, double threshold, double alpha) {
+void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance, DecoratedCloud& cloud, PrimitiveManager& primitives, double threshold, double alpha) {
     Eigen::MatrixXd vertices = cloud.getVertices() ;
     Eigen::MatrixXd normals = cloud.getNormals() ;
     int cloudSize = vertices.rows() ;
@@ -120,8 +120,6 @@ Eigen::Matrix<double, 1,3> computerCenter(Eigen::MatrixXd vertices, Eigen::Matri
 
     // solve the system using least jacobi decomposition
     Eigen::Matrix<double, 3,1> thisCenter ;
-
-
     thisCenter = R.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(q) ;
 
     return thisCenter.transpose() ;
@@ -143,7 +141,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
     void computePlane(Eigen::Matrix<int, 3,1> sample_idx,
                       Eigen::Matrix3d variance,
                       DecoratedCloud &cloud,
-                      CloudPrimitive &primitives,
+                      PrimitiveManager &primitives,
                       double thresh, double alpha) {
         Eigen::MatrixXd V = cloud.getVertices(), N = cloud.getNormals();
 
@@ -204,7 +202,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
     /********* ============= Functions to handle the final cloud =============== *********/
     // fuse the cloud with the same primitives 
-    void fuse(CloudPrimitive& best_primitives,
+    void fuse(PrimitiveManager& best_primitives,
               CloudManager& clouds,
               double T_rad,  // Radius   Distance Threshold (Sphere)
               double T_cent, // Center   Distance Threshold (Sphere)
@@ -297,7 +295,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                 // update the indice to start filling
                 indiceStart += nbVertCloud  ;
 
-                // ****** FUSE THE PRIMITIVES ****** 
+                // ****** FUSE THE PRIMITIVES (only the type) ****** 
                 if (best_primitives.getPrimitive(j)->getType() == 1) {
                       thisType = 1 ;
                 }
@@ -423,7 +421,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
 
     /// ---- RECONSTRUCTION ----
-    void reconstruct(CloudPrimitive& best_primitives, DecoratedCloud& cloud, int nbSamples, double T, double alpha, double T2) {
+    void reconstruct(PrimitiveManager& best_primitives, DecoratedCloud& cloud, int nbSamples, double T, double alpha, double T2) {
         const int n = best_primitives.getCloudSize();
         for (int i = 0; i < n; i++) { // For every primitive
 
@@ -477,8 +475,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         double x_max = inliers2D.col(0).maxCoeff();
         double y_min = inliers2D.col(1).minCoeff();
         double y_max = inliers2D.col(1).maxCoeff();
-
-
 
 
         // --- Generate new 2D samples in (u,v) coordinates ---

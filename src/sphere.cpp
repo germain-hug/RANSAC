@@ -22,7 +22,6 @@ namespace acq {
             if(n > inliers_min){
                 score = 80 + 0.2*(100.0 - (std::abs(density_max - n)) /
                                 double(std::max(density_max, double(n))) * 100.0);
-                //std::cout << " inliers_idx.rows(): " << inliers_idx.rows() << " Score set : " << score << std::endl;
             }
 
         //double score = (double(numberInliers)/double(bestNumber))*100.0 ;
@@ -86,6 +85,7 @@ namespace acq {
         return inliers_idx ;
     }
 
+// will clone a sphere with the right attributs when called 
     Primitive* Sphere::clone(){
         Primitive* thisSphere = new Sphere(this->getRadius(), this->getCenter()) ;
         thisSphere->setType(1) ;

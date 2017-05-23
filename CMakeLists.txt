@@ -121,8 +121,8 @@ set(SOURCE_FILES
 		include/acq/impl/ransac.hpp
 		include/acq/gestion.h
 		include/acq/impl/gestion.hpp
-		include/acq/cloudPrimitive.h
-		include/acq/impl/cloudPrimitive.hpp
+		include/acq/primitiveManager.h
+		include/acq/impl/primitiveManager.hpp
 		include/acq/primitive.h
 		include/acq/impl/primitive.hpp
 		include/acq/cloudManager.h
@@ -137,7 +137,7 @@ set(SOURCE_FILES
 		src/gestion.cpp
 		src/evaluation.cpp 
 		src/ransac.cpp
-		src/cloudPrimitive.cpp
+		src/primitiveManager.cpp
 		src/plane.cpp
 		src/sphere.cpp
     src/normalEstimation.cpp

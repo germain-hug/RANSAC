@@ -1,5 +1,5 @@
-#ifndef ACQ_CLOUDPRIMITIVE_H
-#define ACQ_CLOUDPRIMITIVE_H
+#ifndef ACQ_PRIMITIVEMANAGER_H
+#define ACQ_PRIMITIVEMANAGER_H
 
 #include "acq/primitive.h"
 #include <vector>
@@ -7,12 +7,12 @@
 namespace acq {
 
 /** Small class to keep track of multiple primitives */
-    class CloudPrimitive {
+    class PrimitiveManager {
     public:
 
         // test constructor 
-        CloudPrimitive() {} ;
-        ~CloudPrimitive() {} ;
+        PrimitiveManager() {} ;
+        ~PrimitiveManager() {} ;
 
         /** add a primitive to the vector */
         void addPrimitive(Primitive* primitive);
