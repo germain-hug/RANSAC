@@ -92,7 +92,7 @@ void connectedComponent(DecoratedCloud& cloud, double threshold) {
 
     // free the memory used     
     delete kdTree ;
-    //annDeallocPts(verticesArray) ;
+    annDeallocPts(verticesArray) ;
 }
 
 void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Eigen::MatrixXd& colors, 

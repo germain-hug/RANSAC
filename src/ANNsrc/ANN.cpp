@@ -132,7 +132,7 @@ void annDeallocPt(ANNpoint &p)					// deallocate 1 point
    
 void annDeallocPts(ANNpointArray &pa)			// deallocate points
 {
-	delete [] pa[0];							// dealloc coordinate storage
+	//delete [] pa[0];							// dealloc coordinate storage
 	delete [] pa;								// dealloc points
 	pa = NULL;
 }
