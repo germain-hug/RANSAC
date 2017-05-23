@@ -81,6 +81,11 @@ int main(int argc, char *argv[]) {
     int numberOfOldMesh = 3 ;
     double thresCC = 0.08 ;
 
+    double T_rad = 0.01 ;
+    double T_cent = 0.01 ;
+    double T_norm = 0.98 ;
+    double T_refPt = 0.01 ;
+
     // will store the current primitives and the point cloud per primitives
     acq::CloudPrimitive best_primitives ;
     acq::CloudManager cloudManagerParts ;
@@ -216,7 +221,7 @@ int main(int argc, char *argv[]) {
             &cloudManagerOldMesh, &kNeighbours, &maxNeighbourDist,
             &nbIteration, &samplePerIt, 
             &best_primitives, &cloudManagerParts, &thresh, &alpha, &thresh_best, 
-            &typeMesh, &noise, &numberOfOldMesh, &thresCC
+            &typeMesh, &noise, &numberOfOldMesh, &thresCC, &T_rad, &T_cent, &T_norm, &T_refPt
         ] (igl::viewer::Viewer& viewer)
     {
         // Add an additional menu window
@@ -363,13 +368,34 @@ int main(int argc, char *argv[]) {
             }
         });
 
+       viewer.ngui->addVariable<double>("Threshold for radius sphere (%): ",[&] (double val) {
+                T_rad = val; }, 
+                [&]() { 
+                    return T_rad; 
+        } );  
+
+        viewer.ngui->addVariable<double>("Threshold for center sphere (%): ",[&] (double val) {
+                T_cent = val; }, 
+                [&]() { 
+                    return T_cent; 
+        } );  
+
+        viewer.ngui->addVariable<double>("Threshold normal plane (%): ",[&] (double val) {
+                T_norm = val; }, 
+                [&]() { 
+                    return T_norm; 
+        } );  
+
+
+        viewer.ngui->addVariable<double>("Threshold for reference point (%): ",[&] (double val) {
+                T_refPt = val; }, 
+                [&]() { 
+                    return T_refPt; 
+        } );  
+
           viewer.ngui->addButton("Primitive fusion",
                                [&]() {
             // ******** find values for the threshold *******$
-            double T_rad = 0.01 ;
-            double T_cent = 0.01 ;
-            double T_norm = 0.98 ;
-            double T_refPt = 0.01 ;
 
             // fuse the similar primitive in cloud manager 
             fuse(best_primitives, cloudManagerParts, T_rad, T_cent, T_norm, T_refPt) ;
