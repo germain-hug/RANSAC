@@ -404,7 +404,11 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             if (best_primitives.getPrimitive(i)->getType() == 2) { // If we found a plane
                 Primitive *this_prim = best_primitives.getPrimitive(i);
                 Eigen::MatrixXi inliers_idx = this_prim->computeInliers(cloud, T, alpha); // Retrieve the inliers
+                std::cout << "cloud Size " << cloud.getVertices().rows() << std::endl;
+
                 sampleFromPrimitive(cloud, inliers_idx, *this_prim, nbSamples);
+                std::cout << "cloud Size " << cloud.getVertices().rows() << std::endl;
+
             }
 
         }
@@ -414,6 +418,11 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
     void sampleFromPrimitive(DecoratedCloud& cloud, Eigen::MatrixXi inliers_idx, Primitive plane, int nbSample) {
         /* Compute the optimal number of points for this plane, given the cloud variance and the inliers */
+
+        Eigen::MatrixXd V = cloud.getVertices();
+        Eigen::MatrixXd C = cloud.getColors();
+        std::cout << "V.rows()" << V.rows() << std::endl;
+
 
         // --- Find an orthonormal basis of the plane ---
         Eigen::Matrix<double, Eigen::Dynamic, 3> N(1, 3); N = plane.getNormal().normalized();
@@ -430,8 +439,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         // Compute v to make a basis (u,v,N)
         Eigen::MatrixXd v = u.row(0).cross(N.row(0));
         if(v.norm()!=0.0) v.normalize();
-
-        std::cout << " OK1 " << std::endl;
 
 
         // --- Retrieve 3D Inliers and project on (u,v) basis ---
@@ -455,8 +462,6 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
 
 
-        std::cout << " OK2 " << std::endl;
-
         // --- Generate new 2D samples in (u,v) coordinates ---
         srand(time(NULL));
         double this_x, this_y, f_x, f_y;
@@ -475,14 +480,28 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
                     break;
                 }
             }
-            std::cout << " OK3 " << std::endl;
+
 
             // We found a valid sample, compute its world coordinates
             if (isValid) {
-                std::cout << "thix_x " <<  this_x << "  this_y " << this_y << std::endl;
-            }
 
+                double x = this_x*u(0,0) +  this_y*v(0,0);
+                double y = this_x*u(0,1) +  this_y*v(0,1);
+                double z = this_x*u(0,2) +  this_y*v(0,2);
+                std::cout << "x " << x << " y " << y << " z " << z << std::endl;
+                Eigen::MatrixXd new_vertex(1,3); new_vertex << x, y, z;
+                Eigen::MatrixXd new_color(1,3); new_color << 1.0, 0.0, 0.0;
+                std::cout << "V.rows()" << V.rows() << std::endl;
+
+                V << V, new_vertex.row(0);
+                C << C, new_color.row(0);
+                std::cout << "V.rows()" << V.rows() << std::endl;
+
+            }
         }
+        std::cout << "V.rows()" << V.rows() << std::endl;
+        cloud.setVertices(V);
+        cloud.setColors(C);
     }
 
 }
