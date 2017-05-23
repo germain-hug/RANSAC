@@ -304,7 +304,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
 
     // take a cloudManager and gather all the cloud in one 
-    DecoratedCloud* gatherClouds(CloudManager& cloudManager) {
+    DecoratedCloud* gatherClouds(CloudManager& cloudManager, int colorExit) {
         // === Build new cloud with color attributes ===
         int numberOfCloud = cloudManager.getCloudSize() ;
         int numberOfVertices =0 ;
@@ -331,10 +331,15 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
 
             N.block(indiceStart,0,nbVertCloud,3) = cloudManager.getCloud(i).getNormals();
 
-            C.block(indiceStart,0,nbVertCloud,3) = Eigen::RowVector3d(std::rand()/double(RAND_MAX),
+            if (colorExit==1) {
+                C.block(indiceStart,0,nbVertCloud,3) = cloudManager.getCloud(i).getColors();
+            }
+            else { 
+                C.block(indiceStart,0,nbVertCloud,3) = Eigen::RowVector3d(std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX)).replicate(
                     cloudManager.getCloud(i).getVertices().rows(), 1);
+            }
 
             // update the indice to start filling 
             indiceStart += nbVertCloud  ;

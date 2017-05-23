@@ -47,12 +47,12 @@ namespace acq {
 
                     // store the results both in primitives and cloud
                     if (best_score > thresh_best) {
-                        if (best_prim->getType() == 1) {
+                        /*if (best_prim->getType() == 1) {
                             std::cout << "score sphere : " << best_score << std::endl ;
                         }
                         else {
                             std::cout << "score plane : " << best_score << std::endl;
-                        }
+                        }*/
 
                         thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;                     
                         n_inliers = thisInliers.rows();
@@ -80,7 +80,6 @@ namespace acq {
             }            
             // free the memory allocated with all the primitives not used 
             allPrimitive.clearAllPrimitives() ;
-            std::cout << "size best prim  in RANSAC : " << best_primitives.getCloudSize() << std::endl ;
             // cloudManager and cloudPrimitive contains the result of the function
             return primitiveFound ; // Just return a bool
     };

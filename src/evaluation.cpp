@@ -55,6 +55,15 @@ Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) {
         return newMatrix ;
 }
 
+void connectedComponentManager(CloudManager& thisCloudManager, double threshold) {
+    int sizeCloud = thisCloudManager.getCloudSize() ;
+
+    for (int i = 0; i< sizeCloud; i++) {
+        connectedComponent(thisCloudManager.getCloud(i), threshold) ;
+    } 
+}
+
+
 void connectedComponent(DecoratedCloud& cloud, double threshold) {
     int nbPoints = cloud.getVertices().rows() ;
     int dim = cloud.getVertices().cols() ;
@@ -133,6 +142,8 @@ void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Ei
                 if (distance < threshold) {
                     labelVertices(thisColor, verticesArray, colors, indexFind,visited, kdTree, threshold) ; 
                 }
+                else 
+                    std::cout << "distance : " << distance <<std::endl ;
             }
         }
 

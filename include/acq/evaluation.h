@@ -1,7 +1,7 @@
 #ifndef ACQ_EVALUATION_H
 #define ACQ_EVALUATION_H
 
-#include "acq/decoratedCloud.h"
+#include "acq/cloudManager.h"
 #include <ANN/ANN.h>					// ANN declarations
 
 namespace acq {
@@ -10,6 +10,11 @@ void computeBoundingBox(float &Xmax,float & Xmin,float & Ymax,float & Ymin,float
 
 // with 1 add noise on the vertices, with 2 add noise on the normals 
 Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) ;
+
+
+// ***********************$ Function to perform connected component algorithm ******************
+
+void connectedComponentManager(CloudManager& thisCloudManager, double threshold) ;
 
 void connectedComponent(DecoratedCloud& cloud, double threshold) ;
 
