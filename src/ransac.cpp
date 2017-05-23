@@ -33,7 +33,6 @@ namespace acq {
                 }
 
                 int test = i ;
-               // std::cout << "iter : " << test  << std::endl;
 
                 nbAllPrim = allPrimitive.getCloudSize() ;
 
@@ -51,8 +50,9 @@ namespace acq {
                         if (best_prim->getType() == 1) {
                             std::cout << "score sphere : " << best_score << std::endl ;
                         }
-                        else
-                            std::cout << "score plane : " << best_score << std::endl ;
+                        else {
+                            std::cout << "score plane : " << best_score << std::endl;
+                        }
 
                         thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;                     
                         n_inliers = thisInliers.rows();

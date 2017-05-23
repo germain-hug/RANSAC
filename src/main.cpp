@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
     //************************************
     
     // Load a mesh in OFF format
-    std::string meshPath1 = "../models/scene_2.off";
+    std::string meshPath1 = "../models/scene_3.off";
     if (argc > 1) {
         meshPath1 = std::string(argv[1]);
         if (meshPath1.find(".obj") == std::string::npos) {
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Usage: iglFrameWork <path-to-off-mesh.obj>." << "\n";
     }
 
-    std::string meshPath2 = "../models/scene.off";
+    std::string meshPath2 = "../models/scene_2.off";
     if (argc > 1) {
         meshPath2 = std::string(argv[1]);
         if (meshPath2.find(".obj") == std::string::npos) {
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Usage: iglFrameWork <path-to-off-mesh.obj>." << "\n";
     }
 
-    std::string meshPath3 = "../models/planes.off";
+    std::string meshPath3 = "../models/cube_damaged.off";
     if (argc > 1) {
         meshPath2 = std::string(argv[1]);
         if (meshPath2.find(".obj") == std::string::npos) {
@@ -367,7 +367,7 @@ int main(int argc, char *argv[]) {
             // ******** find values for the threshold *******$
             double T_rad = 0.001 ;
             double T_cent = 0.001 ;
-            double T_norm = 0.001 ;
+            double T_norm = 0.98 ;
             double T_refPt = 0.001 ;
 
             std::cout << "in fuse main : " <<best_primitives.getCloudSize() << std::endl ;
