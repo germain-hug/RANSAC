@@ -117,6 +117,8 @@ set(SOURCE_FILES
     	include/acq/impl/normalEstimation.hpp
     	include/acq/evaluation.h
     	include/acq/impl/evaluation.hpp
+		include/acq/reconstruction.h
+		include/acq/impl/reconstruction.hpp
 		include/acq/ransac.h
 		include/acq/impl/ransac.hpp
 		include/acq/gestion.h
@@ -135,7 +137,8 @@ set(SOURCE_FILES
 		include/ANN/ANNx.h 
 
 		src/gestion.cpp
-		src/evaluation.cpp 
+		src/evaluation.cpp
+		src/reconstruction.cpp
 		src/ransac.cpp
 		src/primitiveManager.cpp
 		src/plane.cpp
