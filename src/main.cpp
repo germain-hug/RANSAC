@@ -1,4 +1,5 @@
 #include "acq/evaluation.h"
+#include "acq/reconstruction.h"
 #include "acq/normalEstimation.h"
 #include "acq/ransac.h"
 
