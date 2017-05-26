@@ -2,7 +2,7 @@
 
 namespace acq {
 
-    bool ransac(DecoratedCloud &cloud, CloudPrimitive &best_primitives, CloudManager &cloudManager, 
+    bool ransac(DecoratedCloud &cloud, PrimitiveManager &best_primitives, CloudManager &cloudManager, 
                 double thresh, double alpha, double thresh_best, int iterationsTotal, int numberSample) {
 
             // ****************** INITIALISATION   ***********
@@ -18,7 +18,7 @@ namespace acq {
             Eigen::Matrix3d variance = computeVariance(cloud.getVertices()) ;
 
             // will contain all the primitives created 
-            CloudPrimitive allPrimitive ;
+            PrimitiveManager allPrimitive ;
 
             // create the primitive for this iteration 
             for (i=0 ; i<iterationsTotal; i++) {

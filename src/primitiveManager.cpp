@@ -1,18 +1,18 @@
-#include "acq/impl/cloudPrimitive.hpp"
+#include "acq/impl/primitiveManager.hpp"
 #include <iostream>
 
 namespace acq {
 
 // ******** This class is inspired from "cloudManager" 
 
-void CloudPrimitive::addPrimitive(Primitive* primitive) {
+void PrimitiveManager::addPrimitive(Primitive* primitive) {
     _primitives.push_back(primitive);
 } 
 
-void CloudPrimitive::setPrimitive(Primitive* primitive, int index) {
+void PrimitiveManager::setPrimitive(Primitive* primitive, int index) {
     if (index >= _primitives.size()) {
         if (index != _primitives.size())
-            std::cerr << "[CloudPrimitive::setPrimitive] "
+            std::cerr << "[PrimitiveManager::setPrimitive] "
                       << "Warning, creating " << index - _primitives.size()
                       << " empty primitive when inserting to index " << index
                       << ", current size is " << _primitives.size()
@@ -23,7 +23,7 @@ void CloudPrimitive::setPrimitive(Primitive* primitive, int index) {
     _primitives.at(index) = primitive;
 } 
 
-Primitive* CloudPrimitive::getPrimitive(int index) {
+Primitive* PrimitiveManager::getPrimitive(int index) {
     if (index < _primitives.size())
         return _primitives.at(index);
     else {
@@ -34,7 +34,7 @@ Primitive* CloudPrimitive::getPrimitive(int index) {
     }
 }
 
-int CloudPrimitive::findBestScore() {
+int PrimitiveManager::findBestScore() {
     int numberPrim = _primitives.size() ;
     double bestScore = 0 ;
     double thisScore ;
@@ -56,13 +56,13 @@ int CloudPrimitive::findBestScore() {
 }
 
 // delete the primitive at the position index
-void CloudPrimitive::deletePrimitive(int index) {
+void PrimitiveManager::deletePrimitive(int index) {
         delete this->getPrimitive(index);
         _primitives.erase(_primitives.begin() + index);
 }
 
 // delete all the primitives and the vector 
-void CloudPrimitive::clearAllPrimitives() {
+void PrimitiveManager::clearAllPrimitives() {
     std::vector<Primitive*>::iterator thisPrimIt;
 
     for ( thisPrimIt = _primitives.begin(); thisPrimIt != _primitives.end(); ) {
@@ -71,7 +71,7 @@ void CloudPrimitive::clearAllPrimitives() {
     }
 }
 
-void CloudPrimitive::deleteCloudFromIndex(int indexStart) {
+void PrimitiveManager::deleteCloudFromIndex(int indexStart) {
         std::vector<Primitive*>::iterator thisPrimitiveIt;
         
         for ( thisPrimitiveIt = _primitives.begin()+indexStart; thisPrimitiveIt != _primitives.end(); ) {

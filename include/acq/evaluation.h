@@ -2,7 +2,7 @@
 #define ACQ_EVALUATION_H
 
 #include "acq/cloudManager.h"
-#include "acq/cloudPrimitive.h"
+#include "acq/primitiveManager.h"
 
 #include <ANN/ANN.h>					// ANN declarations
 
@@ -15,7 +15,7 @@ Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) ;
 
 
 // ***********************$ Function to perform connected component algorithm ******************
-void connectedComponentManager(CloudManager& thisCloudManager, CloudPrimitive& best_primitives, double threshold) ;
+void connectedComponentManager(CloudManager& thisCloudManager, PrimitiveManager& best_primitives, double threshold) ;
 
 void connectedComponent(DecoratedCloud& cloud, double threshold) ;
 

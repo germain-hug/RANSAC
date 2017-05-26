@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
     double T_refPt = 0.01 ;
 
     // will store the current primitives and the point cloud per primitives
-    acq::CloudPrimitive best_primitives ;
+    acq::PrimitiveManager best_primitives ;
     acq::CloudManager cloudManagerParts ;
 
     // deals with several meshes 
@@ -399,11 +399,7 @@ int main(int argc, char *argv[]) {
             // ******** find values for the threshold *******$
 
             // fuse the similar primitive in cloud manager 
-            std::cout << "size best prim before : " << best_primitives.getCloudSize() << std::endl ;
-
             fuse(best_primitives, cloudManagerParts, T_rad, T_cent, T_norm, T_refPt) ;
-
-            std::cout << "size best prim after : " << best_primitives.getCloudSize() << std::endl ;
 
            // fuse the result in the new cloud with random color
             acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts,0) ;
@@ -452,7 +448,7 @@ int main(int argc, char *argv[]) {
             viewer.data.clear() ;
             viewer.data.set_points(cloud.getVertices(), cloud.getColors()) ;
             viewer.core.show_overlay = true;
-                               });
+            });
 
         viewer.ngui->addGroup("Test noise");
        

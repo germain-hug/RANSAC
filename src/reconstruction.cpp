@@ -2,7 +2,7 @@
 
 namespace acq {
     /// ---- RECONSTRUCTION ----
-    void reconstruct(CloudPrimitive& best_primitives, DecoratedCloud& cloud, int nbSamples, double T, double alpha, double T2) {
+    void reconstruct(PrimitiveManager& best_primitives, DecoratedCloud& cloud, int nbSamples, double T, double alpha, double T2) {
         const int n = best_primitives.getCloudSize();
         for (int i = 0; i < n; i++) { // For every primitive
 

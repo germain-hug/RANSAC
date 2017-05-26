@@ -55,7 +55,7 @@ Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) {
         return newMatrix ;
 }
 
-void connectedComponentManager(CloudManager& thisCloudManager, CloudPrimitive& best_primitives, double threshold) {
+void connectedComponentManager(CloudManager& thisCloudManager, PrimitiveManager& best_primitives, double threshold) {
     int sizeCloud = thisCloudManager.getCloudSize() ;
     int numberDelete = 0 ;
     int thisType, nbVertices ;
