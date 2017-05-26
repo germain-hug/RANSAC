@@ -72,7 +72,6 @@ protected:
     FacesT   _faces;    //!< Faces stored as rows of vertex indices (referring to \ref _vertices).
     NormalsT _normals;  //!< Per-vertex normals, associated with \ref _vertices by row ID.
     ColorT  _colors;
-
 public:
     // See https://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

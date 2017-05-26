@@ -30,8 +30,10 @@ namespace acq {
         // delete primitive
         void deletePrimitive(int index) ;
 
+        // clean all the primitive in the cloud 
         void clearAllPrimitives() ;
 
+        // delete from a given index to the end 
         void deleteCloudFromIndex(int indexStart) ;
     protected:
         std::vector<Primitive*> _primitives ;

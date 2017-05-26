@@ -188,23 +188,13 @@ int main(int argc, char *argv[]) {
         Eigen::MatrixXd max_col3 = V3.colwise().maxCoeff();
         V3 /= std::max(max_row3.maxCoeff(), max_col3.maxCoeff());
 
-
+        // 2 times to be able to reload it easily 
         for (int i=0; i<2; i++) {
             cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V, F));
             cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V2, F2));
             cloudManagerOldMesh.addCloud(acq::DecoratedCloud(V3, F3));
         }
 
-        // Store read vertices and faces
-        //N.rowwise().normalize();
-
-        // Set Normals from OBJ file
-        //cloudManagerOldMesh.getCloud(typeMesh).setNormals(N);
-        //std::cout << N.size() << std::endl;
-
-        // Update viewer
-        //acq::setViewerNormals(viewer, cloudManagerOldMesh.getCloud(typeMesh).getVertices(), N);
-    
         // set the mesh 
         viewer.data.clear() ;
 
@@ -228,7 +218,6 @@ int main(int argc, char *argv[]) {
         // Add an additional menu window
         viewer.ngui->addWindow(Eigen::Vector2i(900,10), "Acquisition3D");
 
-        // ***** TODO : add different meshes *****
         viewer.ngui->addGroup("Choose your mesh");
 
         viewer.ngui->addVariable<MeshType>("Which mesh do you want ?",typeMesh)->setItems(
@@ -349,7 +338,7 @@ int main(int argc, char *argv[]) {
             // get back the cloud we want to work on 
             acq::DecoratedCloud thisCloud = cloudManagerOldMesh.getCloud(typeMesh) ;
             int nbVertices = thisCloud.getVertices().rows() ;
-std::cout << "number of original vertices : " << nbVertices << std::endl ;
+            //std::cout << "number of original vertices : " << nbVertices << std::endl ;
 
              // apply RANSAC 
              bool ransacSuccess = ransac(thisCloud, best_primitives, cloudManagerParts, 
@@ -360,9 +349,9 @@ std::cout << "number of original vertices : " << nbVertices << std::endl ;
                 acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts,0) ;
 
                 // for evaluation
-std::cout << "number of new vertices : " << newCloud->getVertices().rows() << std::endl ;
-float percentage = (float(newCloud->getVertices().rows())/float(nbVertices))*100.f ;
-std::cout << "percentage of detection : " << percentage << std::endl ;
+                /*std::cout << "number of new vertices : " << newCloud->getVertices().rows() << std::endl ;
+                float percentage = (float(newCloud->getVertices().rows())/float(nbVertices))*100.f ;
+                std::cout << "percentage of detection : " << percentage << std::endl ;*/
                 
                 viewer.data.clear() ;
 
@@ -403,8 +392,6 @@ std::cout << "percentage of detection : " << percentage << std::endl ;
 
           viewer.ngui->addButton("Primitive fusion",
                                [&]() {
-            // ******** find values for the threshold *******$
-
             // fuse the similar primitive in cloud manager 
             fuse(best_primitives, cloudManagerParts, T_rad, T_cent, T_norm, T_refPt) ;
 
@@ -428,16 +415,16 @@ std::cout << "percentage of detection : " << percentage << std::endl ;
 
         viewer.ngui->addButton("Connected components",
                                [&]() {
-        connectedComponentManager(cloudManagerParts, best_primitives, thresCC) ;
+            connectedComponentManager(cloudManagerParts, best_primitives, thresCC) ;
 
-        // fuse the result in the new cloud with the previous color computed in connected comp
-        acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts,1);
+            // fuse the result in the new cloud with the previous color computed in connected comp
+            acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts,1);
 
-        viewer.data.clear() ;
+            viewer.data.clear() ;
 
-        // Show mesh
-        viewer.data.set_points(newCloud->getVertices(), newCloud->getColors()) ;
-        viewer.core.show_overlay = true;
+            // Show mesh
+            viewer.data.set_points(newCloud->getVertices(), newCloud->getColors()) ;
+            viewer.core.show_overlay = true;
         });
 
         /// ----- RECONSTRUCTION ----

@@ -16,6 +16,7 @@ void computeBoundingBox(float &Xmax,float & Xmin,float & Ymax,float & Ymin,float
     Zmin = minimum(2) ;
 }
 
+// add noise to the vertices of the cloud with typeMatrix==1, to the normals with typeMatrix==2
 Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) {
         // compute the value of the boundingBox for the second cloud 
         float Xmax, Xmin, Ymax, Ymin, Zmax, Zmin ;
@@ -25,7 +26,6 @@ Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) {
         float sigmaX =(Xmax-Xmin)*noise  ;
         float sigmaY = (Ymax-Ymin)*noise ;
         float sigmaZ = (Zmax-Zmin)*noise ;
-
         int M ;
 
         if (typeMatrix==1) 
@@ -33,20 +33,16 @@ Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) {
         else if (typeMatrix==2)
             M = cloud.getNormals().rows() ;
 
-
         // initialization 
         Eigen::MatrixXd random(M, 3)  ;
-
          // construct noise 
           for(int i = 0; i< M; i++) {
              random(i, 0) = std::rand()*sigmaX /RAND_MAX ; 
              random(i, 1) = std::rand()*sigmaY /RAND_MAX ;
              random(i, 2) = std::rand()*sigmaZ /RAND_MAX ;
          }
-        
-        Eigen::MatrixXd newMatrix(M,3) ;
-
         // add noise to the matrix 
+        Eigen::MatrixXd newMatrix(M,3) ;
         if (typeMatrix==1) 
             newMatrix = cloud.getVertices() + random ;
         else if (typeMatrix==2)
@@ -56,11 +52,10 @@ Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) {
 }
 
 void connectedComponentManager(CloudManager& thisCloudManager, PrimitiveManager& best_primitives, double threshold) {
-    int sizeCloud = thisCloudManager.getCloudSize() ;
-    int numberDelete = 0 ;
-    int thisType, nbVertices ;
+    int sizeCloud = thisCloudManager.getCloudSize(), numberDelete = 0, thisType, nbVertices ;
 
     for (int i = 0; i< sizeCloud; i++) {
+        // get back the type and the number of vertices for this mesh 
         thisType = best_primitives.getPrimitive(i-numberDelete)->getType() ;
         nbVertices = thisCloudManager.getCloud(i-numberDelete).getVertices().rows() ;
 
@@ -69,7 +64,7 @@ void connectedComponentManager(CloudManager& thisCloudManager, PrimitiveManager&
             connectedComponent(thisCloudManager.getCloud(i-numberDelete), threshold) ;
         }
 
-        // else if it's a plane, set the color
+        // else if it's a sphere, set the color
         else if (nbVertices > 8 && thisType==1) {
             Eigen::MatrixXd C(nbVertices,3) ;
 
@@ -90,15 +85,13 @@ void connectedComponentManager(CloudManager& thisCloudManager, PrimitiveManager&
 
 
 void connectedComponent(DecoratedCloud& cloud, double threshold) {
-    int nbPoints = cloud.getVertices().rows() ;
-    int dim = cloud.getVertices().cols() ;
+    // initialisation 
+    int nbPoints = cloud.getVertices().rows(), dim = cloud.getVertices().cols(), connectivity = 8  ;
     Eigen::MatrixXd colors(nbPoints,dim) ;
     Eigen::MatrixXd visited(nbPoints,1) ;
     visited = Eigen::MatrixXd::Zero(nbPoints, 1) ;
     Eigen::MatrixXd vertices(nbPoints,dim) ;
     vertices = cloud.getVertices() ;
-    int connectivity = 8 ; 
-
     Eigen::RowVector3d thisLabel = Eigen::RowVector3d(std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX),
                                        std::rand()/double(RAND_MAX)) ;
@@ -112,9 +105,11 @@ void connectedComponent(DecoratedCloud& cloud, double threshold) {
 					verticesArray,					// the data points
 					nbPoints,						// number of points
 					dim);						// dimension of space
-
+    
+    // for each vertices, test if test is satisfied
     for (int i = 0 ; i < nbPoints; i++) {
         if (visited(i,0) == 0) {
+            // label with the current color if unvisited yet
             labelVertices(thisLabel, verticesArray, colors, i, visited, kdTree, threshold, connectivity) ;
 
             // change the label 
@@ -123,6 +118,7 @@ void connectedComponent(DecoratedCloud& cloud, double threshold) {
                                        std::rand()/double(RAND_MAX)) ;
         }
     }
+    // store the result 
     cloud.setColors(colors) ;
 
     // free the memory used     
@@ -132,22 +128,21 @@ void connectedComponent(DecoratedCloud& cloud, double threshold) {
 
 void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Eigen::MatrixXd& colors, 
                     int this_idx, Eigen::MatrixXd& visited, ANNkd_tree*	kdTree, double threshold, int connectivity) {
-
         // store the result for this vertices, visited and the color  
         visited(this_idx, 0) = 1 ; 
         colors.row(this_idx) = thisColor ;
 
-        // chose to selectione the closest 4 points 
+        // chose to selectione the closest "connectivity" points 
         // allocate variable for the kdTree
         ANNidxArray	nnIdx;	
         nnIdx = new ANNidx[connectivity]; // the index 
-
 	    ANNdistArray dists;		
 	    dists = new ANNdist[connectivity]; //the distance
         ANNpoint queryPt;
         queryPt = annAllocPt(3);
         queryPt = verticesArray[this_idx] ; // the point
 
+        // search in the kdTree 
         kdTree->annkSearch(				// search
 				queryPt,						// query point
 				connectivity,								// number of near neighbors
@@ -155,7 +150,7 @@ void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Ei
 				dists,							// distance (returned)
 				0.0);
 
-        // take the results
+        // to store the results
         int indexFind ;
         double distance ;
 
@@ -164,13 +159,14 @@ void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Ei
             indexFind =  nnIdx[thisNeigh] ;
             distance =  dists[thisNeigh] ;
 
+            // if it hasn't been visited yet
             if (visited(indexFind, 0) == 0) {
+                // and the distance is bellow threshold : label recursively 
                 if (distance < threshold) {
                     labelVertices(thisColor, verticesArray, colors, indexFind,visited, kdTree, threshold, connectivity) ; 
                 }
             }
         }
-
         // free memory 
         delete [] nnIdx ;
         delete [] dists;
@@ -181,11 +177,10 @@ void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Ei
 ANNpointArray matrixToANNArray(Eigen::MatrixXd const& points) {
     unsigned int M = points.rows() ;
     int dim = 3 ;
-
 	ANNpointArray dataPts;	
-
     dataPts = annAllocPts(M, dim);			// allocate data points
 
+    // create and allocate memory for each point
     for (int i=0; i<M; i++) {
         ANNpoint point ;
         point = annAllocPt(dim) ;

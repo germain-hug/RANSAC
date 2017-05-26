@@ -48,6 +48,7 @@ int PrimitiveManager::findBestScore() {
 
         // compare with previous result 
         if (thisScore > bestScore) {
+            // store it if best one 
             bestPrimIdx = i ;
             bestScore = thisScore ;
         }

@@ -18,7 +18,6 @@ namespace acq {
     public:
         // constructor/destructor
         Primitive() {} ;
-
         virtual ~Primitive() {} ;
 
         // getters.setters 
@@ -60,6 +59,7 @@ namespace acq {
         void setRadius(double radius){_radius = radius;}
         void setCenter(Eigen::Matrix<double, 1,3> center){_center = center;}
 
+        // functions specific to spheres
         void computeScore(Eigen::Matrix3d variance, DecoratedCloud& cloud, double threshold, double alpha);
         Eigen::MatrixXi computeInliers(DecoratedCloud& cloud, double threshold, double alpha);
         int findBestNumberPoints(Eigen::Matrix3d variance) ;
@@ -75,9 +75,11 @@ namespace acq {
     class Plane : public Primitive {
 
     public:
+        // Constructor and Destructor
         Plane(Eigen::Matrix<double, 1,3> refPoint, Eigen::Matrix<double, 1,3> normal) : _refPoint(refPoint), _normal(normal) {} ;
         ~Plane(){};
 
+        // getters/setters
         Eigen::Matrix<double, 1,3> getNormal() const {return _normal;}
         Eigen::Matrix<double, 1,3> getRefPoint()const {return _refPoint;}
         void setNormal(Eigen::Matrix<double, 1,3> normal) {_normal = normal;}

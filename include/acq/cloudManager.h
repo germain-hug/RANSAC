@@ -28,13 +28,14 @@ public:
     /** \brief Delete cloud with specific index (const version). */
     void deleteCloud(int index);
 
+    // clear all the cloud in the cloudManager
     void clearCloud() ;
 
     // get cloud size 
     int getCloudSize(){return _clouds.size();};
 
+    // delete the primitives from the given index 
     void deleteCloudFromIndex(int indexStart);
-
 
 protected:
     std::vector<DecoratedCloud> _clouds; //!< List of clouds possibly with normals and faces.

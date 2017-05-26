@@ -31,41 +31,41 @@ namespace acq {
                     computeSphere(thisSample, variance, cloud, allPrimitive, thresh, alpha) ;
                     computePlane(thisSample, variance, cloud, allPrimitive, thresh, alpha);
                 }
-
-                int test = i ;
-
                 nbAllPrim = allPrimitive.getCloudSize() ;
 
                 // if a primitive has been created in the turn 
                 if (nbAllPrim>0) {
-                    // get back the best primitive 
+                    // get back the best primitive and its score
                     bestPrim_idx = allPrimitive.findBestScore() ;
                     Primitive* best_prim = allPrimitive.getPrimitive(bestPrim_idx) ;
-
-                    // test for the score
                     best_score = best_prim->getScore() ;
 
-                    // store the results both in primitives and cloud
+                    // keep it if good enough
                     if (best_score > thresh_best) {
+                        // the inliers of this cloud 
                         thisInliers = best_prim->computeInliers(cloud, thresh, alpha) ;                     
                         n_inliers = thisInliers.rows();
 
+                        // extra test 
                         if(n_inliers > 1) {
                             // copy the primitive to store and add it to the newCloud                           
                             Primitive* prim_Storage = best_prim->clone() ;
                             best_primitives.addPrimitive(prim_Storage) ;
 
+                            // clean the cloud and store the inliers in the cloud manager
                             cleanCloud(cloud, cloudManager, thisInliers) ;
                             numberOfPoint = cloud.getVertices().rows() ;
                             primitiveFound = true ;
                         }
+                        // clean the primitive 
                         allPrimitive.deletePrimitive(bestPrim_idx) ;
                     }
+                    // if the primitive isn't good enough, not take into account
                     else {
-                        // if the primitive isn't good enough, not take into account
                         allPrimitive.deletePrimitive(bestPrim_idx) ;
                     }
 
+                    // if there is not enough points in the cloud 
                     if (numberOfPoint < 3) {
                         break ;
                     }
@@ -73,8 +73,9 @@ namespace acq {
             }            
             // free the memory allocated with all the primitives not used 
             allPrimitive.clearAllPrimitives() ;
+
             // cloudManager and cloudPrimitive contains the result of the function
-            return primitiveFound ; // Just return a bool
+            return primitiveFound ; // Just return a bool if ransac finds something
     };
 
 }

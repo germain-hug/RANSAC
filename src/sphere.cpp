@@ -8,27 +8,26 @@ namespace acq {
         // set the inliers for this primitive 
         this->setInliers_idx(inliers_idx) ;
 
+        // *** first try ***
         // Look how many point are supposed to be there  
-        int bestNumber = this->findBestNumberPoints(variance) ;
+        //int bestNumber = this->findBestNumberPoints(variance) ;
 
-        // compute the score 
+        // *** new try ***
         int numberInliers = inliers_idx.rows() ;
 
+        // choose set a score only if the primitive has at least 50 inliers
         double density_max = 70, score = 0;
         int inliers_min = 50;
-
         if(numberInliers > inliers_min){
            score = 80 + 0.2*(100.0 - (std::abs(density_max - numberInliers)) /
                    double(std::max(density_max, double(numberInliers))) * 100.0);
          }
 
-        //double score = (double(numberInliers)/double(bestNumber))*100.0 ;
-
         // set the score for this primitive 
         this->setScore(score) ;
     }
 
-    // find the best number of point for this sphere accordingly to the radius and the variance of points 
+    // find the best number of point for this sphere accordingly to the radius and the variance of points : first idea  
     int Sphere::findBestNumberPoints(Eigen::Matrix3d variance) {
         double thisArea = M_PI*4.0*pow(_radius, 2.0) ;
         Eigen::Matrix<double, 1,3> varianceVector = variance.diagonal() ; 
@@ -43,12 +42,11 @@ namespace acq {
         return numberPoints ;
     }
 
+    // compute the inliers in a mesh 
     Eigen::MatrixXi Sphere::computeInliers(DecoratedCloud& cloud, double threshold, double alpha) {        
-        int numberPoint = cloud.getVertices().rows() ;
+        int numberPoint = cloud.getVertices().rows() , index_inliers = 0;
         Eigen::Matrix<double, 1,3> thisVertice, thisNormal, estimatedNormal ;
-        int index_inliers = 0 ;
         double thisRadius, test1, test2 ;
-
         Eigen::MatrixXi inliers_idx(numberPoint, 1) ;
 
         // test for each point if it is in the sphere or not 
@@ -83,7 +81,7 @@ namespace acq {
         return inliers_idx ;
     }
 
-// will clone a sphere with the right attributs when called 
+    // will clone a sphere with the right attributs when called 
     Primitive* Sphere::clone(){
         Primitive* thisSphere = new Sphere(this->getRadius(), this->getCenter()) ;
         thisSphere->setType(1) ;

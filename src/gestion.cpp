@@ -38,7 +38,7 @@ Eigen::Matrix3d computeVariance(Eigen::MatrixXd V) {
 
 //  ****** ============ Functions to handle a sphere =============== ******* 
 
-// return true if the 3 points create a valid sphere 
+// return true if the 3 points defines a valid sphere 
 int isSphere(Eigen::Matrix3d vertices, Eigen::Matrix3d normals, double threshold, double alpha) {
     // estimate the center and the radius using 2 points
     Eigen::Matrix<double, 1,3> thisCenter = computerCenter(vertices.topRows(2), normals.topRows(2)) ;
@@ -101,10 +101,8 @@ Eigen::Matrix<double, 1,3> computerCenter(Eigen::MatrixXd vertices, Eigen::Matri
     Eigen::Matrix3d R = Eigen::Matrix3d::Zero(3,3) ;
     Eigen::Matrix<double, 3,1> q = Eigen::MatrixXd::Zero(3,1) ;
     Eigen::Matrix3d I = Eigen::Matrix3d::Identity(3,3) ;
-
     int numberPoint = vertices.rows() ;
-    Eigen::Matrix<double, 1,3> thisNormal ;
-    Eigen::Matrix<double, 1,3> thisPosition ;
+    Eigen::Matrix<double, 1,3> thisNormal,thisPosition ;
 
     // fill the system
     for (int i = 0; i< numberPoint; i++) {
@@ -126,9 +124,8 @@ Eigen::Matrix<double, 1,3> computerCenter(Eigen::MatrixXd vertices, Eigen::Matri
 double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> thisCenter) {
     // compute the distance between each point and the center
     int numberPoint = thisVertices.rows() ;
-    Eigen::MatrixXd centerArray = thisCenter.replicate(numberPoint,1) ;
     Eigen::MatrixXd distances(numberPoint,1) ;
-    distances = (thisVertices-centerArray).rowwise().norm() ;
+    distances = (thisVertices-thisCenter.replicate(numberPoint,1)).rowwise().norm() ;
 
     // compute the mean and return it
     double meanRadius = distances.mean() ;
@@ -306,9 +303,8 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             clouds.setCloud(DecoratedCloud(V,N,C), thisLabel-1) ;
             numberOfVertices = 0;
 
+            // set the new primitive type 
             Primitive* newPrimitive = new Primitive() ;
-
-            // set the new primitive 
             if (thisType == 1) {
                 newPrimitive->setType(1) ;
             }
@@ -319,6 +315,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
             best_primitives.setPrimitive(newPrimitive, thisLabel-1) ;
         }
 
+        // clean the rest of the managers to avoid memory leak 
         if(clouds.getCloudSize() - current_label > 0) {
             clouds.deleteCloudFromIndex(current_label+1);
             best_primitives.deleteCloudFromIndex(current_label+1) ;
@@ -373,7 +370,7 @@ double computerRadius(Eigen::MatrixXd thisVertices, Eigen::Matrix<double, 1,3> t
         return newCloud ;
     }
 
-
+    // remove the inliers from the main cloud and store them in the cloudManager
     void cleanCloud(DecoratedCloud& cloudRansac, CloudManager& cloudManager, Eigen::MatrixXi inliers_idx){
         // ---- We remove inliers from cloudRansac -----
         int n_inliers = inliers_idx.rows();

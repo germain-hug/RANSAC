@@ -15,13 +15,17 @@ Eigen::MatrixXd addNoise(float noise, DecoratedCloud& cloud, int typeMatrix) ;
 
 
 // ***********************$ Function to perform connected component algorithm ******************
+// apply the algorithm to each cloud the plane of a cloudmanager
 void connectedComponentManager(CloudManager& thisCloudManager, PrimitiveManager& best_primitives, double threshold) ;
 
+// recursive connected component algorithm to separate distant part of a cloud 
 void connectedComponent(DecoratedCloud& cloud, double threshold) ;
 
+// label a given vertices if its neighbors aren't too far 
 void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Eigen::MatrixXd& colors, 
                     int this_idx, Eigen::MatrixXd& visited, ANNkd_tree*	kdTree, double threshold, int connectivity) ;
 
+// use to convert a matrix in an array for ANN librairy 
 ANNpointArray matrixToANNArray(Eigen::MatrixXd const& points) ;
 }
 
