@@ -23,7 +23,6 @@ void labelVertices(Eigen::RowVector3d thisColor, ANNpointArray verticesArray, Ei
                     int this_idx, Eigen::MatrixXd& visited, ANNkd_tree*	kdTree, double threshold, int connectivity) ;
 
 ANNpointArray matrixToANNArray(Eigen::MatrixXd const& points) ;
-
 }
 
 #endif

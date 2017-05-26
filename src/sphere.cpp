@@ -14,15 +14,13 @@ namespace acq {
         // compute the score 
         int numberInliers = inliers_idx.rows() ;
 
-            // --- Compute the plane score ---
-            double density_max = 70, score = 0;
-            int inliers_min = 50;
-            const int n = inliers_idx.rows();
+        double density_max = 70, score = 0;
+        int inliers_min = 50;
 
-            if(n > inliers_min){
-                score = 80 + 0.2*(100.0 - (std::abs(density_max - n)) /
-                                double(std::max(density_max, double(n))) * 100.0);
-            }
+        if(numberInliers > inliers_min){
+           score = 80 + 0.2*(100.0 - (std::abs(density_max - numberInliers)) /
+                   double(std::max(density_max, double(numberInliers))) * 100.0);
+         }
 
         //double score = (double(numberInliers)/double(bestNumber))*100.0 ;
 

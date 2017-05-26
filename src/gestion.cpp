@@ -79,9 +79,7 @@ void computeSphere(Eigen::Matrix<int, 3,1> sample_idx, Eigen::Matrix3d variance,
         thisSampledNormals.row(i) = normals.row(sample_idx(i,0)) ;
     }
     // test if it's a sphere
-    int is_sphere = isSphere(thisSampledVertices, thisSampledNormals, threshold, alpha) ;
-
-    if (is_sphere==1) {
+    if (isSphere(thisSampledVertices, thisSampledNormals, threshold, alpha)) {
         // compute the attribut for the object
         Eigen::Matrix<double, 1,3> thisCenter = computerCenter(thisSampledVertices, thisSampledNormals) ;
         double thisRadius = computerRadius(thisSampledVertices, thisCenter) ;

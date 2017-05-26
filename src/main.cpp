@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
     double thresh_best = 80.0 ;
     float noise = 0.6 ;
     int numberOfOldMesh = 3 ;
-    double thresCC = 0.003 ;
+    double thresCC = 0.001 ;
 
     double T_rad = 0.01 ;
     double T_cent = 0.01 ;
@@ -347,6 +347,8 @@ int main(int argc, char *argv[]) {
                                [&]() {
             // get back the cloud we want to work on 
             acq::DecoratedCloud thisCloud = cloudManagerOldMesh.getCloud(typeMesh) ;
+            int nbVertices = thisCloud.getVertices().rows() ;
+std::cout << "number of original vertices : " << nbVertices << std::endl ;
 
              // apply RANSAC 
              bool ransacSuccess = ransac(thisCloud, best_primitives, cloudManagerParts, 
@@ -356,6 +358,11 @@ int main(int argc, char *argv[]) {
                 // fuse the result in the new cloud 
                 acq::DecoratedCloud* newCloud = gatherClouds(cloudManagerParts,0) ;
 
+                // for evaluation
+std::cout << "number of new vertices : " << newCloud->getVertices().rows() << std::endl ;
+float percentage = (float(newCloud->getVertices().rows())/float(nbVertices))*100.f ;
+std::cout << "percentage of detection : " << percentage << std::endl ;
+                
                 viewer.data.clear() ;
 
                 // Show mesh
